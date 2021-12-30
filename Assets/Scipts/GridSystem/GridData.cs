@@ -6,6 +6,7 @@ public class GridData
 {
     public int num;
     public IPlaceableObj placeableObj;
+    public bool isOccupied;
     
     // Start is called before the first frame update
     public GridData(int num)

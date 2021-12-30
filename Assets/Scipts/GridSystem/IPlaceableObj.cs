@@ -27,6 +27,11 @@ public interface IPlaceableObj
         set;
     }
 
+    Vector2Int Position
+    {
+        get;
+    }
+
     /// <summary>
     /// whether or not a path(the grid chain from one grid to another grid) can contain a grid if the object is placed into this grid.
     /// </summary>

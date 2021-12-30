@@ -32,7 +32,7 @@ public class GridSystem
         {
             Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + $": z({z}) out of range! ");
         }
-        return new Vector3(x * sideLength, z * sideLength, 0f) + origin;
+        return new Vector3(x * sideLength, 0f, z * sideLength) + origin;
     }
 
     //Get gridSystem position(x,y) from world Position. The position should be on the grid System plane.
@@ -96,21 +96,78 @@ public class GridSystem
 
     }
 
-    public void setValue(int x, int z, GridData data)
+
+    public bool setValue(int x, int z, GridData data, int width=1, int height=1)
     {
-        gridDataArray[x, z] = data;
+        if (!checkWidthHeight(x, z, width, height))
+        {
+            Debug.LogError("no rectangle exists at (x,z) with this set of width and height.");
+            return false;
+        }
+        //TODO: Add UI hint.
+        else if (!checkOccupation(x, z, width, height))
+        {
+            Debug.LogError("At least one grid is already occupied!");
+            return false;
+        }
+        else
+        {
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    gridDataArray[x + i, z + j] = data;
+                    gridDataArray[x + i, z + j].isOccupied = true;
+                }
+            }
+            return true;
+        }
+        
     }
 
-    public void setValue(Vector3 worldPosition, GridData data)
+    public bool setValue(Vector3 worldPosition, GridData data, int width = 1, int height = 1)
     {
         if (checkWorldPosition(worldPosition))
         {
             int x; int z;
-            getXZ(worldPosition, out x,out z);
-            gridDataArray[x, z] = data;
-        } 
+            getXZ(worldPosition, out x, out z);
+            return setValue(x, z, data, width, height);
+        }
+        else return false;
     }
 
+    /// <summary>
+    /// remove all the grid data within the width*height rectangle at (x,z)
+    /// </summary>
+    /// <param name="x">grid coordinate x</param>
+    /// <param name="z">grid coordinate y</param>
+    /// <param name="width">how many grids horizontally in the rect</param>
+    /// <param name="height">how many grids vertically in the rect</param>
+    public void removeValue(int x, int z, int width = 1, int height = 1)
+    {
+        if (!checkWidthHeight(x, z, width, height))
+        {
+            Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + " :checkWidthHeight failed");
+        }
+        else
+        {
+            for(int i = 0; i < width; i++)
+            {
+                for(int j = 0; j < height; j++)
+                {
+                    gridDataArray[x + i, z + j] = new GridData();
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// check if the given world position is within the boundary
+    /// x:[origin.x, origin.x + width*sideLength] 
+    /// y:[origin.y, origin.y + height*sideLength]
+    /// </summary>
+    /// <param name="worldPosition">World position to be checked</param>
+    /// <returns>true if it is within the range</returns>
     bool checkWorldPosition(Vector3 worldPosition)
     {
         if (worldPosition.x >= origin.x && worldPosition.x <= origin.x + width * sideLength)
@@ -124,5 +181,89 @@ public class GridSystem
             }
         }
         return false;
+    }
+
+    /// <summary>
+    /// check if the width*height grid rectangle with its left-bottom point at grid position(x,z) exists in current grid system.
+    /// </summary>
+    /// <param name="x">grid coordinate x</param>
+    /// <param name="z">grid coordinate y</param>
+    /// <param name="width">how many grids horizontally in the rect</param>
+    /// <param name="height">how many grids vertically in the rect</param>
+    /// <returns></returns>
+    bool checkWidthHeight(int x, int z, int width, int height)
+    {
+        if (x >= 0 && z >= 0 && x + width <= this.width && z + height <= this.height) return true;
+        else return false;
+    }
+
+    /// <summary>
+    /// check if the width*height rectangle at (x,z) is occupied.
+    /// </summary>
+    /// <param name="x">grid coordinate x</param>
+    /// <param name="z">grid coordinate y</param>
+    /// <param name="width">how many grids horizontally in the rect</param>
+    /// <param name="height">how many grids vertically in the rect</param>
+    /// <returns>if all of the rectangle is not occupied, return true. Otherwise return false</returns>
+    bool checkOccupation(int x, int z, int width, int height)
+    {
+        if (!checkWidthHeight(x, z, width, height)) return false;
+        for(int i = 0; i < width; i++)
+        {
+            for(int j = 0; j < height; j++)
+            {
+                if (gridDataArray[x + i, z + j].isOccupied)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    Vector3 getBlankGrid(Vector2Int gridCoordinate, int width, int height)
+    {
+        gridCoordinate -= Vector2Int.one;
+        width += 2;
+        height += 2;
+
+        //check if there is a blank grid backward
+        for(int i = 0; i < width; i++)
+        {
+            if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < this.width && gridCoordinate.y >= 0 && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y].isOccupied)
+            {
+                return getWorldPosition(gridCoordinate.x + i, gridCoordinate.y);
+            }
+        }
+
+        //check if there is a blank grid left
+        for(int j=0;j<height;j++)
+        {
+            if(gridCoordinate.y + j>=0 && gridCoordinate.y + j < this.height && gridCoordinate.x >=0 && !gridDataArray[gridCoordinate.x, gridCoordinate.y].isOccupied)
+            {
+                return getWorldPosition(gridCoordinate.x, gridCoordinate.y + j);
+            }
+        }
+
+        //check if there is a blank grid forward
+        for (int i = 0; i < width; i++)
+        {
+            if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < this.width && gridCoordinate.y + height - 1  < this.height && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y + height-1].isOccupied)
+            {
+                return getWorldPosition(gridCoordinate.x + i, gridCoordinate.y + height -1);
+            }
+        }
+
+        //check if there is a blank grid right
+        for (int j = 0; j < height; j++)
+        {
+            if (gridCoordinate.y + j >= 0 && gridCoordinate.y + j < this.height && gridCoordinate.x + width -1 < this.width && !gridDataArray[gridCoordinate.x + width -1, gridCoordinate.y + j].isOccupied)
+            {
+                return getWorldPosition(gridCoordinate.x + width -1, gridCoordinate.y + j);
+            }
+        }
+
+        return Vector3.zero;
+
     }
 }
