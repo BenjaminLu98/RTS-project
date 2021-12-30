@@ -16,7 +16,10 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
         }
     }
 
-    public abstract void train(int index);
+    public void train(int index)
+    {
+
+    }
     
 
     protected GridSystem gridSystem;
