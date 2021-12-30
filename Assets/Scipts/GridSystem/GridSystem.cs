@@ -96,7 +96,15 @@ public class GridSystem
 
     }
 
-
+    /// <summary>
+    /// update the Grid data array with the parameters and mark them as occupied.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="z"></param>
+    /// <param name="data"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    /// <returns></returns>
     public bool setValue(int x, int z, GridData data, int width=1, int height=1)
     {
         if (!checkWidthHeight(x, z, width, height))
@@ -124,6 +132,8 @@ public class GridSystem
         }
         
     }
+
+
 
     public bool setValue(Vector3 worldPosition, GridData data, int width = 1, int height = 1)
     {
@@ -221,8 +231,16 @@ public class GridSystem
         return true;
     }
 
-    Vector3 getBlankGrid(Vector2Int gridCoordinate, int width, int height)
+    /// <summary>
+    /// Find a grid that is not occupied around the given rectangle.
+    /// </summary>
+    /// <param name="gridCoordinate">the origin of the rectangle</param>
+    /// <param name="width">the width of the rectangle</param>
+    /// <param name="height">the height of the rectangle</param>
+    /// <returns>return the rectangle's left-bottom point if it found a blank point. Otherwise it will return (0,0)</returns>
+    public Vector2Int getBlankGrid(Vector2Int gridCoordinate, int width, int height)
     {
+        //TODO: extend this function so that it can find blank rectangle
         gridCoordinate -= Vector2Int.one;
         width += 2;
         height += 2;
@@ -232,16 +250,16 @@ public class GridSystem
         {
             if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < this.width && gridCoordinate.y >= 0 && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y].isOccupied)
             {
-                return getWorldPosition(gridCoordinate.x + i, gridCoordinate.y);
+                return new Vector2Int(gridCoordinate.x + i, gridCoordinate.y);
             }
         }
 
         //check if there is a blank grid left
         for(int j=0;j<height;j++)
         {
-            if(gridCoordinate.y + j>=0 && gridCoordinate.y + j < this.height && gridCoordinate.x >=0 && !gridDataArray[gridCoordinate.x, gridCoordinate.y].isOccupied)
+            if(gridCoordinate.y + j>=0 && gridCoordinate.y + j < this.height && gridCoordinate.x >=0 && !gridDataArray[gridCoordinate.x, gridCoordinate.y+j].isOccupied)
             {
-                return getWorldPosition(gridCoordinate.x, gridCoordinate.y + j);
+                return new Vector2Int(gridCoordinate.x, gridCoordinate.y + j);
             }
         }
 
@@ -250,7 +268,7 @@ public class GridSystem
         {
             if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < this.width && gridCoordinate.y + height - 1  < this.height && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y + height-1].isOccupied)
             {
-                return getWorldPosition(gridCoordinate.x + i, gridCoordinate.y + height -1);
+                return new Vector2Int(gridCoordinate.x + i, gridCoordinate.y + height -1);
             }
         }
 
@@ -259,11 +277,23 @@ public class GridSystem
         {
             if (gridCoordinate.y + j >= 0 && gridCoordinate.y + j < this.height && gridCoordinate.x + width -1 < this.width && !gridDataArray[gridCoordinate.x + width -1, gridCoordinate.y + j].isOccupied)
             {
-                return getWorldPosition(gridCoordinate.x + width -1, gridCoordinate.y + j);
+                return new Vector2Int(gridCoordinate.x + width -1, gridCoordinate.y + j);
             }
         }
 
-        return Vector3.zero;
+        return Vector2Int.zero;
 
+    }
+
+    /// <summary>
+    /// check if the grid is occupied
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="z"></param>
+    /// <returns>true if it is not occupied</returns>
+    public bool checkOccupation(int x, int z)
+    {
+        checkWidthHeight(x, z, 1, 1);
+        return !gridDataArray[x, z].isOccupied;
     }
 }

@@ -5,8 +5,9 @@ using UnityEngine;
 public class TestGridSystem : MonoBehaviour
 {
     GridSystem gridSystem;
-    public Building2m2 keep;
-    public Building2m2 keep2;
+    [SerializeField] public Building2m2 keep;
+    [SerializeField] public Building2m2 keep2;
+    [SerializeField] public Archer archer;
     // Start is called before the first frame update
     void Start()
     {
@@ -18,6 +19,9 @@ public class TestGridSystem : MonoBehaviour
         gridSystem.InitializeGridVal();
         keep.GridSystem = gridSystem;
         keep2.GridSystem = gridSystem;
+        archer.GridSystem = gridSystem;
+
+        
     }
 
     // Update is called once per frame
@@ -29,10 +33,25 @@ public class TestGridSystem : MonoBehaviour
             Vector3 position = GridUtils.ScreenToGridPlane(gridSystem);
             keep.placeAt(position);
             gridSystem.UpdateGridVal();
+
+            //archer.placeAt(position);
         }
         if (Input.GetMouseButtonDown(1))
         {
-            keep.rotate();
+            //keep.rotate();
+            Debug.Log("result=" + gridSystem.getBlankGrid(new Vector2Int(5, 5), 2, 2).ToString());
+        }
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            archer.Animator.SetBool("isRunning", true);
+        }
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            archer.Animator.SetBool("isRunning", false);
+        }
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            keep.train(0);
         }
     }
 }

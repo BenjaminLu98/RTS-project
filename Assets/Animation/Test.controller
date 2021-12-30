@@ -34,7 +34,7 @@ AnimatorController:
   m_Name: Test
   serializedVersion: 5
   m_AnimatorParameters:
-  - m_Name: Is running
+  - m_Name: isRunning
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -73,7 +73,7 @@ AnimatorStateMachine:
     m_Position: {x: 317, y: 389, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 5778093121990521354}
-    m_Position: {x: 620.0469, y: 315.4592, z: 0}
+    m_Position: {x: 570, y: 310, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -159,7 +159,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Is running
+    m_ConditionEvent: isRunning
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 5778093121990521354}

@@ -23,6 +23,16 @@ public class GridUtils
        
     }
 
+    /// <summary>
+    /// Using TMP to create text mesh.
+    /// </summary>
+    /// <param name="words">text content</param>
+    /// <param name="location">world space coordinate of text mesh</param>
+    /// <param name="parentName">the parent game object's name</param>
+    /// <param name="objName">object name</param>
+    /// <param name="width">the width of the mesh</param>
+    /// <param name="height">the height of the mesh</param>
+    /// <param name="fontSize"></param>
     public static void createWorldText(string words, Vector3 location,string parentName, string objName, float width, float height, float fontSize)
     {
         GameObject gameObject = new GameObject(objName, typeof(TextMeshPro));
@@ -40,6 +50,12 @@ public class GridUtils
         textComponent.alignment = TextAlignmentOptions.Center;
     }
 
+    /// <summary>
+    /// updating existing TextMeshPro object
+    /// </summary>
+    /// <param name="newWords">new content of the text mesh</param>
+    /// <param name="parentName">the parent's name</param>
+    /// <param name="childName">the gameobject's name</param>
     public static void updateWorldText(string newWords,string parentName, string childName)
     {
         var parent = GameObject.Find(parentName);
@@ -53,4 +69,5 @@ public class GridUtils
             }
         }
     }
+
 }

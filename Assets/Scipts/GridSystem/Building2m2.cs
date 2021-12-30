@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Building2m2 : MonoBehaviour,IBuilding
+public abstract class Building2m2 : MonoBehaviour,IBuilding
 {
-    private List<IUnit> trainableUnits;
-    public List<IUnit> TrainableUnits { 
+    protected List<GameObject> trainableUnits;
+    public List<GameObject> TrainableUnits { 
         get
         {
             return trainableUnits;
@@ -16,7 +16,10 @@ public class Building2m2 : MonoBehaviour,IBuilding
         }
     }
 
-    private GridSystem gridSystem;
+    public abstract void train(int index);
+    
+
+    protected GridSystem gridSystem;
     public GridSystem GridSystem { 
         set
         {
@@ -24,7 +27,7 @@ public class Building2m2 : MonoBehaviour,IBuilding
         }
     }
 
-    int hp;
+    protected int hp;
     public int HP
     {
         get
@@ -47,7 +50,7 @@ public class Building2m2 : MonoBehaviour,IBuilding
         Destroy(this, 2f);
     }
 
-    private bool isObtacle=true;
+    protected bool isObtacle=true;
     public bool IsObstacle
     {
         get
@@ -60,8 +63,8 @@ public class Building2m2 : MonoBehaviour,IBuilding
         }
     }
 
-    int width=2;
-    int height=2;
+    protected int width =2;
+    protected int height =2;
     public Vector2Int Size
     {
         get
@@ -76,9 +79,9 @@ public class Building2m2 : MonoBehaviour,IBuilding
     }
 
     //x of grid position
-    int x;
+    protected int x;
     //z of grid position
-    int z;
+    protected int z;
     public Vector2Int Position
     {
         get
@@ -87,12 +90,25 @@ public class Building2m2 : MonoBehaviour,IBuilding
         }
     }
 
-    IBuilding.dir currentDir;
+    protected IBuilding.dir currentDir=IBuilding.dir.backward;
     public IBuilding.dir CurrentDir
     {
         get
         {
             return currentDir;
+        }
+    }
+
+    protected GameObject prefab;
+    public GameObject Prefab
+    {
+        get
+        {
+            return prefab;
+        }
+        set
+        {
+            prefab = value;
         }
     }
 
@@ -114,10 +130,9 @@ public class Building2m2 : MonoBehaviour,IBuilding
                 break;
         }
         transform.GetChild(0).Rotate(Vector3.forward, -90f);
-
     }
 
-    public void placeAt(int x, int z)
+    public virtual void placeAt(int x, int z)
     {
         if (gridSystem == null) Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
         else
@@ -136,7 +151,7 @@ public class Building2m2 : MonoBehaviour,IBuilding
         }
     }
 
-    public void placeAt(Vector3 worldPosition)
+    public virtual void placeAt(Vector3 worldPosition)
     {
         if (gridSystem == null) Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
         else
@@ -156,6 +171,22 @@ public class Building2m2 : MonoBehaviour,IBuilding
             
         }
     }
-    
-    
+
+    public void produce(int index)
+    {
+        if (index < 0 || index > trainableUnits.Count)
+        {
+            Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + " :index out of range");
+        }
+
+        Vector2Int TargetGrid = gridSystem.getBlankGrid(new Vector2Int(x, z), width, height);
+        Vector3 targetPosition = gridSystem.getWorldPosition(TargetGrid.x, TargetGrid.y);
+        if (gridSystem.checkOccupation(TargetGrid.x, TargetGrid.y))
+        {
+            GameObject unit = Instantiate(trainableUnits[index], targetPosition, Quaternion.identity);
+            Unit placeableComponent = unit.GetComponent<Unit>();
+            //Can I update the grid date at another place?
+            gridSystem.setValue(TargetGrid.x, TargetGrid.y, new GridData(99, placeableComponent), placeableComponent.Size.x, placeableComponent.Size.y);
+        }
+    }
 }

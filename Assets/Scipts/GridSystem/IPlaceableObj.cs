@@ -39,5 +39,13 @@ public interface IPlaceableObj
     {
         get;
         set;
-    } 
+    }
+
+    Vector2Int Size
+    {
+        get;
+        set;
+    }
+
+
 }

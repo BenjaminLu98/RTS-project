@@ -7,23 +7,27 @@ public interface IBuilding : IPlaceableObj
     /// <summary>
     /// The units that can be produced by this building
     /// </summary>
-    List<IUnit> TrainableUnits
+    List<GameObject> TrainableUnits
     {
         get;
         set;
     }
 
-    Vector2Int Size
-    {
-        get;
-        set;
-    }
+
     public enum dir {forward,left,backward,right};
 
     int HP
     {
         get;
     }
+
+    public void train(int index);
+
+    /// <summary>
+    /// Immediately produce a unit at a grid that is not occupied.
+    /// </summary>
+    /// <param name="index">the index in the trainableUnits list</param>
+    public void produce(int index);
 
     public void damage(int damageAmount);
 
