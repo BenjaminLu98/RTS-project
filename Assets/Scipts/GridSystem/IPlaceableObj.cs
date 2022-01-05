@@ -10,14 +10,14 @@ public interface IPlaceableObj
     /// </summary>
     /// <param name="x">the x coordinate in grid system</param>
     /// <param name="z">the z coordinate in grid system</param>
-    public void placeAt(int x, int z);
+    public bool placeAt(int x, int z);
 
     /// <summary>
     /// Place the object in the grid using WoldPosition. 
     /// It will use grid System to find the true world position of this object and then use it to update the position
     /// </summary>
     /// <param name="worldPosition">The world Position of the object</param>
-    public void placeAt(Vector3 worldPosition);
+    public bool placeAt(Vector3 worldPosition);
 
     /// <summary>
     /// save the reference of the gridSystem

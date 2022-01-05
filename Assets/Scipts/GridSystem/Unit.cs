@@ -70,9 +70,13 @@ public abstract class Unit : MonoBehaviour, IUnit
     }
 
 
-    public void placeAt(int x, int z)
+    public bool placeAt(int x, int z)
     {
-        if (gridSystem == null) Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
+        if (gridSystem == null)
+        {
+            Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
+            return false;
+        }
         else
         {
             bool isSucess = gridSystem.setValue(x, z, new GridData(100, this));
@@ -85,13 +89,19 @@ public abstract class Unit : MonoBehaviour, IUnit
 
                 this.x = x;
                 this.z = z;
+                return true;
             }
+            return false;
         }
     }
 
-    public void placeAt(Vector3 worldPosition)
+    public bool placeAt(Vector3 worldPosition)
     {
-        if (gridSystem == null) Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
+        if (gridSystem == null)
+        {
+            Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
+            return false;
+        }
         else
         {
             bool isSuccess = gridSystem.setValue(worldPosition, new GridData(100, this), width, height);
@@ -105,7 +115,9 @@ public abstract class Unit : MonoBehaviour, IUnit
                 gridSystem.removeValue(this.x, this.z, width, height);
                 this.x = x;
                 this.z = z;
+                return true;
             }
+            return false;
         }
     }
 

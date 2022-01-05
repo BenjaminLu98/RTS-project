@@ -10,6 +10,15 @@ public class GridSystem
     public float sideLength = 2f;
     GridData[,] gridDataArray;
 
+    public static GridSystem gridSystem=new GridSystem(Vector3.zero);
+    public static GridSystem current
+    {
+        get
+        {
+            return gridSystem;
+        }
+    }
+
     public GridSystem(Vector3 origin)
     {
         this.origin = origin;
@@ -68,7 +77,7 @@ public class GridSystem
         
     }
 
-    //Update grid value each frame. Call it in Update
+    //Update grid value each frame for debugging. Call it in Update
     public void UpdateGridVal()
     {
         for (int i = 0; i < width; i++)
@@ -178,7 +187,7 @@ public class GridSystem
     /// </summary>
     /// <param name="worldPosition">World position to be checked</param>
     /// <returns>true if it is within the range</returns>
-    bool checkWorldPosition(Vector3 worldPosition)
+    public bool checkWorldPosition(Vector3 worldPosition)
     {
         if (worldPosition.x >= origin.x && worldPosition.x <= origin.x + width * sideLength)
         {
@@ -201,7 +210,7 @@ public class GridSystem
     /// <param name="width">how many grids horizontally in the rect</param>
     /// <param name="height">how many grids vertically in the rect</param>
     /// <returns></returns>
-    bool checkWidthHeight(int x, int z, int width, int height)
+    public bool checkWidthHeight(int x, int z, int width, int height)
     {
         if (x >= 0 && z >= 0 && x + width <= this.width && z + height <= this.height) return true;
         else return false;
@@ -296,4 +305,5 @@ public class GridSystem
         checkWidthHeight(x, z, 1, 1);
         return !gridDataArray[x, z].isOccupied;
     }
+
 }

@@ -5,6 +5,8 @@ using UnityEngine;
 public abstract class Building2m2 : MonoBehaviour,IBuilding
 {
     protected List<GameObject> trainableUnits;
+    [SerializeField] protected GameObject previewPrefab;
+
     public List<GameObject> TrainableUnits { 
         get
         {
@@ -102,7 +104,6 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
         }
     }
 
-    protected GameObject prefab;
     public GameObject Prefab
     {
         get
@@ -114,6 +115,9 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
             prefab = value;
         }
     }
+
+    protected static GameObject prefab;
+    
 
     public void rotate()
     {
@@ -135,9 +139,13 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
         transform.GetChild(0).Rotate(Vector3.forward, -90f);
     }
 
-    public virtual void placeAt(int x, int z)
+    public virtual bool placeAt(int x, int z)
     {
-        if (gridSystem == null) Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
+        if (gridSystem == null)
+        {
+            Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
+            return false;
+        }
         else
         {
             bool isSucess = gridSystem.setValue(x, z, new GridData(100, this));
@@ -150,13 +158,21 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
 
                 this.x = x;
                 this.z = z;
+
+                gridSystem.UpdateGridVal();
+                return true;
             }
+            return false;
         }
     }
 
-    public virtual void placeAt(Vector3 worldPosition)
+    public virtual bool placeAt(Vector3 worldPosition)
     {
-        if (gridSystem == null) Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
+        if (gridSystem == null)
+        {
+            Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
+            return false;
+        }
         else
         {
             bool isSuccess = gridSystem.setValue(worldPosition, new GridData(100, this), width, height);
@@ -170,8 +186,11 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
                 gridSystem.removeValue(this.x, this.z, width, height);
                 this.x = x;
                 this.z = z;
+
+                gridSystem.UpdateGridVal();
+                return true;
             }
-            
+            return false;
         }
     }
 
@@ -192,4 +211,6 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
             gridSystem.setValue(TargetGrid.x, TargetGrid.y, new GridData(99, placeableComponent), placeableComponent.Size.x, placeableComponent.Size.y);
         }
     }
+
+
 }

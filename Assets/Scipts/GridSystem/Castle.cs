@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class Castle : Building2m2
 {
+
     private void Start()
     {
         trainableUnits = new List<GameObject>();
         ResourceLoader rl = FindObjectOfType<ResourceLoader>();
         //Archer
-        trainableUnits.Add(rl.resourceList[0]);   
+        trainableUnits.Add(rl.resourceList[0]);
     }
 }

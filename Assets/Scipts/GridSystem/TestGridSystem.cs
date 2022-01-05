@@ -36,11 +36,7 @@ public class TestGridSystem : MonoBehaviour
 
             //archer.placeAt(position);
         }
-        if (Input.GetMouseButtonDown(1))
-        {
-            //keep.rotate();
-            Debug.Log("result=" + gridSystem.getBlankGrid(new Vector2Int(5, 5), 2, 2).ToString());
-        }
+
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             archer.Animator.SetBool("isRunning", true);
@@ -51,7 +47,7 @@ public class TestGridSystem : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.A))
         {
-            keep.train(0);
+            keep.produce(0);
         }
     }
 }
