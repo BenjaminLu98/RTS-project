@@ -19,14 +19,6 @@ public interface IPlaceableObj
     /// <param name="worldPosition">The world Position of the object</param>
     public bool placeAt(Vector3 worldPosition);
 
-    /// <summary>
-    /// save the reference of the gridSystem
-    /// </summary>
-    GridSystem GridSystem
-    {
-        set;
-    }
-
     Vector2Int Position
     {
         get;

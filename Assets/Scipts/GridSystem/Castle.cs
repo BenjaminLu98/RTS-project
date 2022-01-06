@@ -2,8 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Castle : Building2m2
+public class Castle : Building
 {
+    public Castle()
+    {
+        width = 2;
+        height = 2;
+    }
 
     private void Start()
     {

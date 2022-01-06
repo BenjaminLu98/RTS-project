@@ -21,11 +21,6 @@ public interface IBuilding : IPlaceableObj
         get;
     }
 
-    public GameObject Prefab
-    {
-        get;
-        set;
-    }
 
     public void train(int index);
 

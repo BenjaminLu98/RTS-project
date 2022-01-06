@@ -5,8 +5,8 @@ using UnityEngine;
 public class TestGridSystem : MonoBehaviour
 {
     GridSystem gridSystem;
-    [SerializeField] public Building2m2 keep;
-    [SerializeField] public Building2m2 keep2;
+    [SerializeField] public Building keep;
+    [SerializeField] public Building keep2;
     [SerializeField] public Archer archer;
     // Start is called before the first frame update
     void Start()
@@ -17,8 +17,6 @@ public class TestGridSystem : MonoBehaviour
         gridSystem.getXZ(new Vector3(10.5f, 0.0f, 4.5f),out x,out y);
         //Debug.Log(x.ToString()+"  "+y.ToString());
         gridSystem.InitializeGridVal();
-        keep.GridSystem = gridSystem;
-        keep2.GridSystem = gridSystem;
         archer.GridSystem = gridSystem;
 
         
@@ -30,9 +28,9 @@ public class TestGridSystem : MonoBehaviour
         gridSystem.drawDebugLine();
         if (Input.GetMouseButtonDown(0))
         {
-            Vector3 position = GridUtils.ScreenToGridPlane(gridSystem);
-            keep.placeAt(position);
-            gridSystem.UpdateGridVal();
+            //Vector3 position = GridUtils.ScreenToGridPlane(gridSystem);
+            //keep.placeAt(position);
+            //gridSystem.UpdateGridVal();
 
             //archer.placeAt(position);
         }

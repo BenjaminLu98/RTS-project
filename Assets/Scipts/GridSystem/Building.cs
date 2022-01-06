@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Building2m2 : MonoBehaviour,IBuilding
+public abstract class Building : MonoBehaviour,IBuilding
 {
     protected List<GameObject> trainableUnits;
     [SerializeField] protected GameObject previewPrefab;
@@ -21,15 +21,6 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
     public void train(int index)
     {
 
-    }
-    
-
-    protected GridSystem gridSystem;
-    public GridSystem GridSystem { 
-        set
-        {
-            gridSystem = value;
-        }
     }
 
     protected int hp;
@@ -68,8 +59,8 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
         }
     }
 
-    protected int width =2;
-    protected int height =2;
+    protected int width ;
+    protected int height ;
     public Vector2Int Size
     {
         get
@@ -104,21 +95,9 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
         }
     }
 
-    public GameObject Prefab
-    {
-        get
-        {
-            return prefab;
-        }
-        set
-        {
-            prefab = value;
-        }
-    }
-
-    protected static GameObject prefab;
-    
-
+    /// <summary>
+    /// rotate around the y axis in counter clockwise direction
+    /// </summary>
     public void rotate()
     {
         switch (currentDir)
@@ -139,61 +118,60 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
         transform.GetChild(0).Rotate(Vector3.forward, -90f);
     }
 
+    /// <summary>
+    /// place the object at grid coordinate(x,z) and replace the value in the grids. The size of the rectangle is specified by width and height.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="z"></param>
+    /// <returns>true if the grid system successfully place the building at the this position</returns>
     public virtual bool placeAt(int x, int z)
     {
-        if (gridSystem == null)
+        bool isSucess = GridSystem.current.setValue(x, z, new GridData(100, this));
+        if (isSucess)
         {
-            Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
-            return false;
+            Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
+            transform.position = truePosition;
+
+            GridSystem.current.removeValue(this.x, this.z, width, height);
+
+            this.x = x;
+            this.z = z;
+
+            GridSystem.current.UpdateGridVal();
+            return true;
         }
-        else
-        {
-            bool isSucess = gridSystem.setValue(x, z, new GridData(100, this));
-            if (isSucess)
-            {
-                Vector3 truePosition = gridSystem.getWorldPosition(x, z);
-                transform.position = truePosition;
-
-                gridSystem.removeValue(this.x, this.z, width, height);
-
-                this.x = x;
-                this.z = z;
-
-                gridSystem.UpdateGridVal();
-                return true;
-            }
-            return false;
-        }
+        return false;
     }
 
+    /// <summary>
+    /// place the object at worldPosition and replace the value in the grids. The size of the rectangle is specified by width and height.
+    /// </summary>
+    /// <param name="worldPosition"></param>
+    /// <returns>true if the grid system successfully place the building at the this position</returns>
     public virtual bool placeAt(Vector3 worldPosition)
     {
-        if (gridSystem == null)
+        bool isSuccess = GridSystem.current.setValue(worldPosition, new GridData(100, this), width, height);
+        if (isSuccess)
         {
-            Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
-            return false;
-        }
-        else
-        {
-            bool isSuccess = gridSystem.setValue(worldPosition, new GridData(100, this), width, height);
-            if (isSuccess)
-            {
-                int x, z;
-                gridSystem.getXZ(worldPosition, out x, out z);
-                Vector3 truePosition = gridSystem.getWorldPosition(x, z);
-                transform.position = truePosition;
+            int x, z;
+            GridSystem.current.getXZ(worldPosition, out x, out z);
+            Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
+            transform.position = truePosition;
 
-                gridSystem.removeValue(this.x, this.z, width, height);
-                this.x = x;
-                this.z = z;
+            GridSystem.current.removeValue(this.x, this.z, width, height);
+            this.x = x;
+            this.z = z;
 
-                gridSystem.UpdateGridVal();
-                return true;
-            }
-            return false;
+            GridSystem.current.UpdateGridVal();
+            return true;
         }
+        return false;  
     }
 
+    /// <summary>
+    /// generate a unit immediately around the building
+    /// </summary>
+    /// <param name="index">the index of the unit in trainable unit list</param>
     public void produce(int index)
     {
         if (index < 0 || index > trainableUnits.Count)
@@ -201,16 +179,14 @@ public abstract class Building2m2 : MonoBehaviour,IBuilding
             Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + " :index out of range");
         }
 
-        Vector2Int TargetGrid = gridSystem.getBlankGrid(new Vector2Int(x, z), width, height);
-        Vector3 targetPosition = gridSystem.getWorldPosition(TargetGrid.x, TargetGrid.y);
-        if (gridSystem.checkOccupation(TargetGrid.x, TargetGrid.y))
+        Vector2Int TargetGrid = GridSystem.current.getBlankGrid(new Vector2Int(x, z), width, height);
+        Vector3 targetPosition = GridSystem.current.getWorldPosition(TargetGrid.x, TargetGrid.y);
+        if (GridSystem.current.checkOccupation(TargetGrid.x, TargetGrid.y))
         {
             GameObject unit = Instantiate(trainableUnits[index], targetPosition, Quaternion.identity);
             Unit placeableComponent = unit.GetComponent<Unit>();
             //Can I update the grid date at another place?
-            gridSystem.setValue(TargetGrid.x, TargetGrid.y, new GridData(99, placeableComponent), placeableComponent.Size.x, placeableComponent.Size.y);
+            GridSystem.current.setValue(TargetGrid.x, TargetGrid.y, new GridData(99, placeableComponent), placeableComponent.Size.x, placeableComponent.Size.y);
         }
     }
-
-
 }
