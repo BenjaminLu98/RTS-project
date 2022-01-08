@@ -6,16 +6,13 @@ public abstract class Unit : MonoBehaviour, IUnit
 {
     public int HP => throw new System.NotImplementedException();
 
-    GridSystem gridSystem;
-    public GridSystem GridSystem {
-        set
-        {
-            gridSystem = value;
-        }
-    }
-
+    protected float rotateSpeed;
+    protected bool isMoving;
     protected int x;
     protected int z;
+    protected Vector3 targetPosition;
+    protected float trueSpeed;
+    protected Quaternion targetRotation;
     public Vector2Int Position
     {
         get
@@ -50,17 +47,49 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
     }
 
-    public void moveTo(Vector3 worldPosition)
+    public void moveTo(Vector3 WorldPosition, float speed)
     {
-        throw new System.NotImplementedException();
+        targetPosition = WorldPosition;
+        Vector3 moveDirection = (targetPosition - transform.position).normalized;
+
+        //Rotate.
+        targetRotation = Quaternion.LookRotation(moveDirection);
+        transform.rotation = targetRotation;
+
+        //Move.
+        if (!targetPosition.Equals(transform.position))
+        {
+            isMoving = true;
+            if (speed > maxSpeed)
+            {
+                trueSpeed = maxSpeed;
+            }
+            else
+            {
+                trueSpeed = speed;
+            }
+
+            //Make sure the unit will finally arrive exactly at the target position.
+            if((targetPosition - transform.position).magnitude > Time.deltaTime * trueSpeed)
+            {
+                transform.position += Time.deltaTime * trueSpeed * moveDirection;
+            }
+            else
+            {
+                transform.position = targetPosition;
+                isMoving = false;
+            }
+        }
     }
 
-    public void MoveTo(int x, int z)
+    public void MoveTo(int x, int z, float speed)
     {
-        throw new System.NotImplementedException();
+        Vector3 targetPosition = GridSystem.current.getWorldPosition(x, z);
+        moveTo(targetPosition, speed);
     }
 
     protected Animator animator;
+
     public Animator Animator
     {
         get
@@ -69,56 +98,70 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
     }
 
+    public float PhysicalAttack { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float MagicAttack { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float PhysicalDefence { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float MagicDefence { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float Mana { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float AttackSpeed { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float AttackInterval { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float AttackRange { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
+    float maxSpeed = 3f;
+    public float MaxSpeed
+    {
+        get
+        {
+            return maxSpeed;
+        }
+    }
 
     public bool placeAt(int x, int z)
     {
-        if (gridSystem == null)
-        {
-            Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
-            return false;
-        }
-        else
-        {
-            bool isSucess = gridSystem.setValue(x, z, new GridData(100, this));
-            if (isSucess)
-            {
-                Vector3 truePosition = gridSystem.getWorldPosition(x, z);
-                transform.position = truePosition;
 
-                gridSystem.removeValue(this.x, this.z, width, height);
+        bool isSuccess = GridSystem.current.setValue(x, z, new GridData(100, this));
+        if (isSuccess)
+        {
+            Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
+            transform.position = truePosition;
 
-                this.x = x;
-                this.z = z;
-                return true;
-            }
-            return false;
+            GridSystem.current.removeValue(this.x, this.z, width, height);
+
+            this.x = x;
+            this.z = z;
+            return true;
         }
+        return false;
+
     }
 
     public bool placeAt(Vector3 worldPosition)
     {
-        if (gridSystem == null)
+       
+        bool isSuccess = GridSystem.current.setValue(worldPosition, new GridData(100, this), width, height);
+        if (isSuccess)
         {
-            Debug.Log(this.GetType().Name + ": gridSystem not loaded!");
-            return false;
-        }
-        else
-        {
-            bool isSuccess = gridSystem.setValue(worldPosition, new GridData(100, this), width, height);
-            if (isSuccess)
-            {
-                int x, z;
-                gridSystem.getXZ(worldPosition, out x, out z);
-                Vector3 truePosition = gridSystem.getWorldPosition(x, z);
-                transform.position = truePosition;
+            int x, z;
+            GridSystem.current.getXZ(worldPosition, out x, out z);
+            Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
+            transform.position = truePosition;
 
-                gridSystem.removeValue(this.x, this.z, width, height);
-                this.x = x;
-                this.z = z;
-                return true;
-            }
-            return false;
+            GridSystem.current.removeValue(this.x, this.z, width, height);
+            this.x = x;
+            this.z = z;
+            return true;
         }
+        return false;
+
+    }
+
+    private void Update()
+    {
+        if (isMoving)
+        {
+            moveTo(targetPosition, trueSpeed);
+        }
+        
     }
 
 }

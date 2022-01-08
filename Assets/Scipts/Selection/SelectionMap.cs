@@ -5,7 +5,6 @@ using UnityEngine;
 public class SelectionMap : MonoBehaviour
 {
     public Dictionary<int, GameObject> selectionMap=new Dictionary<int, GameObject>();
-    // Start is called before the first frame update
 
     public void add(GameObject obj)
     {
@@ -22,6 +21,7 @@ public class SelectionMap : MonoBehaviour
         }
 
     }
+
     public void remove(GameObject obj)
     {
         if (obj != null)
@@ -33,6 +33,7 @@ public class SelectionMap : MonoBehaviour
         }
 
     }
+
     public void removeAll()
     {
         foreach(KeyValuePair<int,GameObject>pair in selectionMap)

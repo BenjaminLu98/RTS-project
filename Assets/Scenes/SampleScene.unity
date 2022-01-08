@@ -494,9 +494,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   previewPrefab: {fileID: 4394565833366194244, guid: 0fd0960d106c24f4d8baa09b18847192,
     type: 3}
-  clickedEvent:
-    m_PersistentCalls:
-      m_Calls: []
+  prefab: {fileID: 4394565833366194244, guid: 56d7767495d3fc346b044dbdcf42dc93, type: 3}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1111,7 +1109,7 @@ PrefabInstance:
     - target: {fileID: 2011182206628058054, guid: 16dcb777c27051349b46d9a7c3ea0da7,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -3.28
       objectReference: {fileID: 0}
     - target: {fileID: 2011182206628058054, guid: 16dcb777c27051349b46d9a7c3ea0da7,
         type: 3}

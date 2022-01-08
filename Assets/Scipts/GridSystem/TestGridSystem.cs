@@ -4,37 +4,35 @@ using UnityEngine;
 
 public class TestGridSystem : MonoBehaviour
 {
-    GridSystem gridSystem;
     [SerializeField] public Building keep;
     [SerializeField] public Building keep2;
     [SerializeField] public Archer archer;
     // Start is called before the first frame update
     void Start()
     {
-        gridSystem = new GridSystem(transform.position);
-        //Debug.Log(gridSystem.getWorldPosition(10, 0));
-        int x; int y;
-        gridSystem.getXZ(new Vector3(10.5f, 0.0f, 4.5f),out x,out y);
         //Debug.Log(x.ToString()+"  "+y.ToString());
-        gridSystem.InitializeGridVal();
-        archer.GridSystem = gridSystem;
-
-        
+        GridSystem.current.InitializeGridVal();
     }
 
     // Update is called once per frame
     void Update()
     {
-        gridSystem.drawDebugLine();
+        GridSystem.current.drawDebugLine();
         if (Input.GetMouseButtonDown(0))
         {
             //Vector3 position = GridUtils.ScreenToGridPlane(gridSystem);
             //keep.placeAt(position);
-            //gridSystem.UpdateGridVal();
 
+            //GridSystem.current.UpdateGridVal();
             //archer.placeAt(position);
-        }
 
+            archer.MoveTo(5, 5, 3f);
+        }
+        if (Input.GetMouseButtonDown(1))
+        {
+
+            archer.MoveTo(2, 8, 3f);
+        }
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             archer.Animator.SetBool("isRunning", true);
@@ -47,5 +45,11 @@ public class TestGridSystem : MonoBehaviour
         {
             keep.produce(0);
         }
+       
+    }
+
+    private void LateUpdate()
+    {
+        
     }
 }

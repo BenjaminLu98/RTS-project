@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//TODO: generic
 public class GridSystem
 {
     public Vector3 origin;
@@ -65,7 +66,9 @@ public class GridSystem
         return origin.y;
     }
 
-    // Draw grid data using TextmeshPro. Do not use it in Update()!
+    /// <summary>
+    /// Draw grid data using TextmeshPro. Use it in the start method.
+    /// </summary>
     public void InitializeGridVal() {
         for (int i = 0; i < width; i++)
         {
@@ -77,7 +80,9 @@ public class GridSystem
         
     }
 
-    //Update grid value each frame for debugging. Call it in Update
+    /// <summary>
+    /// Update grid value each frame for debugging. Call it when the grid value need to be update.
+    /// </summary>
     public void UpdateGridVal()
     {
         for (int i = 0; i < width; i++)

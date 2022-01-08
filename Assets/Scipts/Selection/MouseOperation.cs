@@ -38,7 +38,6 @@ public class MouseOperation : MonoBehaviour
             {
                 dragSlection = true;
             }
-
         }
         //moouse is released
         else if (Input.GetMouseButtonUp(0))
@@ -97,6 +96,7 @@ public class MouseOperation : MonoBehaviour
             }
         }
     }
+
     private void OnGUI()
     {
         if (dragSlection == true)
