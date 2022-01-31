@@ -45,7 +45,12 @@ public class GridSystem
         return new Vector3(x * sideLength, 0f, z * sideLength) + origin;
     }
 
-    //Get gridSystem position(x,y) from world Position. The position should be on the grid System plane.
+    /// <summary>
+    /// Get gridSystem position(x,y) from world Position. The position should be on the grid System plane.
+    /// </summary>
+    /// <param name="worldPosition"></param>
+    /// <param name="x"></param>
+    /// <param name="z"></param>
     public void getXZ(Vector3 worldPosition, out int x, out int z)
     {
         if (worldPosition.x < origin.x)
@@ -185,6 +190,13 @@ public class GridSystem
         }
     }
 
+    public void removeValue(Vector3 worldPosition, int width = 1, int height = 1)
+    {
+        int x, z;
+        getXZ(worldPosition, out x, out z);
+        removeValue(x, z, width, height);
+    }
+
     /// <summary>
     /// check if the given world position is within the boundary
     /// x:[origin.x, origin.x + width*sideLength] 
@@ -229,7 +241,7 @@ public class GridSystem
     /// <param name="width">how many grids horizontally in the rect</param>
     /// <param name="height">how many grids vertically in the rect</param>
     /// <returns>if all of the rectangle is not occupied, return true. Otherwise return false</returns>
-    bool checkOccupation(int x, int z, int width, int height)
+    public bool checkOccupation(int x, int z, int width, int height)
     {
         if (!checkWidthHeight(x, z, width, height)) return false;
         for(int i = 0; i < width; i++)
@@ -311,4 +323,15 @@ public class GridSystem
         return !gridDataArray[x, z].isOccupied;
     }
 
+    /// <summary>
+    /// check if the grid is occupied. Ignore obj.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="z"></param>
+    /// <returns>true if it is not occupied or the occupied grid contains obj.</returns>
+    public bool checkOccupationExcept(int x, int z, IPlaceableObj obj)
+    {
+        checkWidthHeight(x, z, 1, 1);
+        return !gridDataArray[x, z].isOccupied || obj.Equals(gridDataArray[x, z].placeableObj);
+    }
 }

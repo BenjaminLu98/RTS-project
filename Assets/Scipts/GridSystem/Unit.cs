@@ -4,15 +4,24 @@ using UnityEngine;
 
 public abstract class Unit : MonoBehaviour, IUnit
 {
+    protected float hp;
+    //Note that you need to convert float hp to integer.
     public int HP => throw new System.NotImplementedException();
 
-    protected float rotateSpeed;
-    protected bool isMoving;
+    protected float rotateSpeed=180f;
+    protected bool isMoving=false;
+    protected bool isRotating=false;
     protected int x;
     protected int z;
     protected Vector3 targetPosition;
     protected float trueSpeed;
     protected Quaternion targetRotation;
+    protected Transform modelTransform;
+
+    private void Start()
+    {
+        modelTransform = transform.GetChild(0);
+    }
     public Vector2Int Position
     {
         get
@@ -47,39 +56,57 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
     }
 
+    //TODO: minimum rotation.
     public void moveTo(Vector3 WorldPosition, float speed)
     {
-        targetPosition = WorldPosition;
+        int x, z;
+        GridSystem.current.getXZ(WorldPosition, out x, out z);
+        targetPosition = GridSystem.current.getWorldPosition(x, z);
         Vector3 moveDirection = (targetPosition - transform.position).normalized;
+
+        if (speed > maxSpeed)
+        {
+            trueSpeed = maxSpeed;
+        }
+        else
+        {
+            trueSpeed = speed;
+        }
 
         //Rotate.
         targetRotation = Quaternion.LookRotation(moveDirection);
-        transform.rotation = targetRotation;
 
-        //Move.
-        if (!targetPosition.Equals(transform.position))
+        //If rotation is not complete, rotate first. Otherwise pass the rotation phase and do the Movement.
+        //Note that we rotate the model transform but translate the parent transform.
+        if (!targetRotation.Equals(modelTransform.rotation))
         {
-            isMoving = true;
-            if (speed > maxSpeed)
-            {
-                trueSpeed = maxSpeed;
-            }
-            else
-            {
-                trueSpeed = speed;
-            }
-
-            //Make sure the unit will finally arrive exactly at the target position.
-            if((targetPosition - transform.position).magnitude > Time.deltaTime * trueSpeed)
-            {
-                transform.position += Time.deltaTime * trueSpeed * moveDirection;
-            }
-            else
-            {
-                transform.position = targetPosition;
-                isMoving = false;
-            }
+            isRotating = true;
+            Quaternion tempRotation = Quaternion.RotateTowards(modelTransform.rotation, targetRotation, rotateSpeed*Time.deltaTime);
+            modelTransform.rotation = tempRotation;
         }
+        else
+        {
+            isRotating = false;
+            //Move.
+            if (!targetPosition.Equals(transform.position) && GridSystem.current.checkOccupationExcept(x, z, this))
+            {
+                isMoving = true;
+                GridSystem.current.removeValue(transform.position, width, height);
+
+                //Make sure the unit will finally arrive exactly at the target position.
+                if ((targetPosition - transform.position).magnitude > Time.deltaTime * trueSpeed)
+                {
+                    transform.position += Time.deltaTime * trueSpeed * moveDirection;
+                }
+                else
+                {
+                    transform.position = targetPosition;
+                    isMoving = false;
+                }
+                GridSystem.current.setValue(transform.position, new GridData(10, this), width, height);
+                
+            }
+        }   
     }
 
     public void MoveTo(int x, int z, float speed)
@@ -155,12 +182,41 @@ public abstract class Unit : MonoBehaviour, IUnit
 
     }
 
+    public float attack(int x, int z, float expectedDamage)
+    {
+        if(GridSystem.current.checkOccupation(x, z))
+        {
+            Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod()+":No unit in the target position(${x},${z})");
+            return 0;
+        }
+        //Find the target unit
+
+        //deal damage
+
+        //return actual damage
+        return 0;
+    }
+
+    public bool recieveDamage(float expectedDamage, IUnit.DamageType type)
+    {
+        //calculate actual damage
+
+        //apply damage
+
+        //if the damage is greater than hp, then the unit will die.
+
+
+        return true;
+    }
+
+
     private void Update()
     {
-        if (isMoving)
+        if (isRotating||isMoving)
         {
             moveTo(targetPosition, trueSpeed);
         }
+
         
     }
 

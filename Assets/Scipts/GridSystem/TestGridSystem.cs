@@ -26,12 +26,13 @@ public class TestGridSystem : MonoBehaviour
             //GridSystem.current.UpdateGridVal();
             //archer.placeAt(position);
 
-            archer.MoveTo(5, 5, 3f);
+            //archer.MoveTo(5, 5, 3f);
         }
         if (Input.GetMouseButtonDown(1))
         {
-
-            archer.MoveTo(2, 8, 3f);
+            //int x, z;
+            //GridSystem.current.getXZ(new Vector3(0.5f, 0f, 0.5f), out x,out z);
+            //Debug.Log(x + "," + z);
         }
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
@@ -45,7 +46,7 @@ public class TestGridSystem : MonoBehaviour
         {
             keep.produce(0);
         }
-       
+        GridSystem.current.UpdateGridVal();
     }
 
     private void LateUpdate()

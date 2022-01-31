@@ -13,7 +13,7 @@ public class MouseOperation : MonoBehaviour
     MeshCollider selectionBox;
     SelectionMap map;
     RaycastHit hit;
-    // Start is called before the first frame update
+
     void Start()
     {
         dragSlection = false;
@@ -24,28 +24,32 @@ public class MouseOperation : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // mouse is clicked down
+
+        // Mouse is clicked down
         if (Input.GetMouseButtonDown(0))
         {
            p1 = Input.mousePosition;
         }
-        // mouse is being clicked
+        // Mouse is being clicked.
+        // If two points are far away from each other, it should be the drag selection. Otherwise it is a single selection.
         else if (Input.GetMouseButton(0))
         {
            p2 = Input.mousePosition;
-            // single selection
             if ((p2 - p1).magnitude > 40)
             {
                 dragSlection = true;
             }
         }
-        //moouse is released
+        //Mouse is released. 
         else if (Input.GetMouseButtonUp(0))
         {
+            if (!Input.GetKey(KeyCode.LeftShift))
+            {
+                map.removeAll();
+            }
             if (!dragSlection)
             {
                 Ray ray = Camera.main.ScreenPointToRay(p1);
-
                 if (Physics.Raycast(ray, out hit, 50000.0f))
                 {
                     if (Input.GetKey(KeyCode.LeftShift)) //inclusive select
@@ -61,35 +65,70 @@ public class MouseOperation : MonoBehaviour
             }
             else
             {
-                p2 = Input.mousePosition;
-                verts = new Vector3[4];
-                vecs = new Vector3[4];
-                var count = 0;
-                corners= getBoundingBox(p1, p2);
-                foreach(Vector3 corner in corners)
+                //p2 = Input.mousePosition;
+                //verts = new Vector3[4];
+                //vecs = new Vector3[4];
+                //var count = 0;
+                //corners= getBoundingBox(p1, p2);
+                //foreach(Vector3 corner in corners)
+                //{
+                //    var ray = Camera.main.ScreenPointToRay(corner);
+                //    if (Physics.Raycast(ray,out hit, 50000.0f))
+                //    {
+                //        vecs[count] = ray.origin - hit.point;
+                //        verts[count] = hit.point;
+                //        Debug.DrawLine(Camera.main.ScreenToWorldPoint(corner), hit.point, Color.red, 1.0f);     
+                //    }
+                //    count++;
+
+                //}
+                //var selectionMesh = generateSelectionMesh(verts, vecs);
+                //selectionBox = gameObject.AddComponent<MeshCollider>();
+                //selectionBox.sharedMesh = selectionMesh;
+                //selectionBox.convex = true;
+                //selectionBox.isTrigger = true;
+
+                //First do a raycast from p1 and p2 in Selection layer.
+                //After getting p1w and p2w, calculate the center and halfExtent, using OverlapBox to get All the collider within the box.
+                //Note that we need to set selectable unit to layer"selectable".
+
+                int mask = 1 << 6;
+                Ray p1Ray = Camera.main.ScreenPointToRay(p1);
+                Ray p2Ray = Camera.main.ScreenPointToRay(p2);
+                RaycastHit p1Hit;
+                RaycastHit p2Hit;
+                if (Physics.Raycast(p1Ray, out p1Hit, 200f, mask)&& Physics.Raycast(p2Ray, out p2Hit, 200f, mask))
                 {
-                    var ray = Camera.main.ScreenPointToRay(corner);
-                    if (Physics.Raycast(ray,out hit, 50000.0f))
+                    Vector3 p1w = p1Hit.point;
+                    Vector3 p2w = p2Hit.point;
+                    Debug.DrawLine(p1w, p2w);
+                    Debug.LogWarning("p1w:" + p1w + ", p2w:" + p2w);
+                    if (p1w.y > p2w.y)
                     {
-                        vecs[count] = ray.origin - hit.point;
-                        verts[count] = hit.point;
-                        Debug.DrawLine(Camera.main.ScreenToWorldPoint(corner), hit.point, Color.red, 1.0f);
-                        
+                        p1w.y = p2w.y;
                     }
-                    count++;
+                    if(p2w.y > p1w.y)
+                    {
+                        p2w.y = p1w.y;
+                    }
+                    
+                    float halfHeight = 50f;
+                    Vector3 center = (p1w + p2w) / 2f + Vector3.up * halfHeight;
+
+                    Vector3 halfExtent = new Vector3(Mathf.Abs(p1w.x - p2w.x) / 2f, halfHeight, Mathf.Abs(p1w.z - p2w.z) / 2f);
+
+                    Collider[] colliders = Physics.OverlapBox(center, halfExtent);
+                    
+                    foreach(Collider collder in colliders)
+                    {
+                        Debug.LogWarning(collder.gameObject.layer);
+                        //Selectable layer
+                        if (collder.gameObject.layer==7) map.add(collder.gameObject);
+                    }
 
                 }
-                var selectionMesh = generateSelectionMesh(verts, vecs);
-                selectionBox = gameObject.AddComponent<MeshCollider>();
-                selectionBox.sharedMesh = selectionMesh;
-                selectionBox.convex = true;
-                selectionBox.isTrigger = true;
-                if (!Input.GetKey(KeyCode.LeftShift))
-                {
-                    map.removeAll();
-                }
 
-                Destroy(selectionBox, 0.02f);
+                //Destroy(selectionBox, 0.02f);
 
 
                 dragSlection = false;
@@ -107,7 +146,12 @@ public class MouseOperation : MonoBehaviour
         }
     }
 
-    //create a bounding box (4 corners in order) from the start and end mouse position
+    /// <summary>
+    /// create a bounding box (4 corners in order) from the start and end mouse position
+    /// </summary>
+    /// <param name="p1">one of the two diagonal vertex</param>
+    /// <param name="p2">the other one of the two diagonal vertex</param>
+    /// <returns>the four vertices including p1 and p2 that forms a rectangle</returns>
     Vector2[] getBoundingBox(Vector2 p1, Vector2 p2)
     {
         Vector2 newP1;

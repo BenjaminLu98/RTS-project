@@ -4,6 +4,15 @@ using UnityEngine;
 
 public interface IUnit :IPlaceableObj
 {
+    public enum DamageType{
+        Physical,
+        Magic
+    };
+    public enum DefenseType
+    {
+        Physical,
+        Magic
+    };
     int HP
     {
         get;
@@ -67,7 +76,7 @@ public interface IUnit :IPlaceableObj
     }
 
     /// <summary>
-    /// Rotate to the target and move to the target position with animation
+    /// Rotate to the target and move to the target position with animation. 
     /// </summary>
     /// <param name="worldPosition">target position</param>
     /// <param name="speed"></param>
@@ -75,7 +84,15 @@ public interface IUnit :IPlaceableObj
     //Move to the target position with animation
     public void MoveTo(int x, int z, float speed);
 
-    
+    /// <summary>
+    /// Attack the gameObject at position(x,z). If there is no unit in the target posiiton, do nothing.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="z"></param>
+    /// <param name="expectedDamage">the damage without any discount(defense or ability...)</param>
+    /// <returns>Actual damage</returns>
+    public float attack(int x, int z, float expectedDamage);
 
+    public bool recieveDamage(float expectedDamage, DamageType type);
 
 }

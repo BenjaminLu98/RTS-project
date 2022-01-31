@@ -6,6 +6,11 @@ public class SelectionMap : MonoBehaviour
 {
     public Dictionary<int, GameObject> selectionMap=new Dictionary<int, GameObject>();
 
+    //TODO: select building
+    /// <summary>
+    /// Add the obj into the map and add a Selection component to this object.
+    /// </summary>
+    /// <param name="obj"></param>
     public void add(GameObject obj)
     {
         if (obj != null)

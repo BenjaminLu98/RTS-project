@@ -158,7 +158,7 @@ public abstract class Building : MonoBehaviour,IBuilding
             Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
             transform.position = truePosition;
 
-            GridSystem.current.removeValue(this.x, this.z, width, height);
+            //GridSystem.current.removeValue(this.x, this.z, width, height);
             this.x = x;
             this.z = z;
 

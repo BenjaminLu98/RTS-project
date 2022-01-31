@@ -4,15 +4,22 @@ using UnityEngine;
 
 public class SelectionComponent : MonoBehaviour
 {
+    Unit unit;
     // Start is called before the first frame update
-    void Start()
+    void OnEnable()
     {
-        GetComponent<Renderer>().material.color = Color.red;
+        unit = GetComponent<Unit>();
     }
 
-    // Update is called once per frame
-    private void OnDestroy()
+    private void Update()
     {
-        GetComponent<Renderer>().material.color = Color.white;
+        if (Input.GetMouseButtonUp(1))
+        {
+            Vector3 targetPosition = GridUtils.ScreenToGridPlane();
+            unit.moveTo(targetPosition, 3f);
+        }
+        
     }
+
+
 }

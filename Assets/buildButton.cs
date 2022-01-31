@@ -32,7 +32,7 @@ public class buildButton : MonoBehaviour
             Debug.LogError(GetType().Name + " :preview not loaded!");
             return;
         }
-        previewInstance = Instantiate(previewPrefab, GridUtils.ScreenToGridPlane(GridSystem.current), Quaternion.identity);
+        previewInstance = Instantiate(previewPrefab, GridUtils.ScreenToGridPlane(), Quaternion.identity);
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ public class buildButton : MonoBehaviour
         //Make the preview model follow the mouse.
         if (previewInstance)
         {
-            Vector3 worldPosition= GridUtils.ScreenToGridPlane(GridSystem.current);
+            Vector3 worldPosition= GridUtils.ScreenToGridPlane();
             int x, z;
             GridSystem.current.getXZ(worldPosition, out x, out z);
             previewInstance.transform.position = GridSystem.current.getWorldPosition(x,z);
@@ -69,9 +69,16 @@ public class buildButton : MonoBehaviour
         {
             if (previewInstance)
             {
-                Vector3 position = GridUtils.ScreenToGridPlane(GridSystem.current);
-                bool result = GridSystem.current.checkWorldPosition(position);
-                if (result)
+                Vector3 position = GridUtils.ScreenToGridPlane();
+                int x, z;
+                GridSystem.current.getXZ(position, out x, out z);
+                Building building = prefab.GetComponent<Building>();
+
+                //TODO: add width and height to the boundary check;
+                bool boundaryCheck = GridSystem.current.checkWorldPosition(position);
+                bool occupationCheck = GridSystem.current.checkOccupation(x, z, building.Size.x, building.Size.y);
+                
+                if (boundaryCheck&&occupationCheck)
                 {
                     instance = Instantiate(prefab, previewInstance.transform.position, Quaternion.identity);
                     IPlaceableObj placeableObj = instance.GetComponent<IPlaceableObj>();

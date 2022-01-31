@@ -5,8 +5,16 @@ using TMPro;
 
 public class GridUtils 
 {
-    public static Vector3 ScreenToGridPlane(GridSystem gridSystem)
+
+    /// <summary>
+    /// Convert the mouse position from screen position to the world Position on the GridPlane
+    /// Note that the grid plane is now fixed to the plane containing the origin and (0,1,0) as normal.
+    /// </summary>
+    /// <param name="gridSystem"></param>
+    /// <returns></returns>
+    public static Vector3 ScreenToGridPlane()
     {
+        GridSystem gridSystem = GridSystem.current;
         Plane plane = new Plane(Vector3.up, gridSystem.origin);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         float distanceToPlane;
