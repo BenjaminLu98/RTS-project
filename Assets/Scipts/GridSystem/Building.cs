@@ -126,7 +126,7 @@ public abstract class Building : MonoBehaviour,IBuilding
     /// <returns>true if the grid system successfully place the building at the this position</returns>
     public virtual bool placeAt(int x, int z)
     {
-        bool isSucess = GridSystem.current.setValue(x, z, new GridData(100, this));
+        bool isSucess = GridSystem.current.setValue(x, z, 100, this);
         if (isSucess)
         {
             Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
@@ -137,7 +137,6 @@ public abstract class Building : MonoBehaviour,IBuilding
             this.x = x;
             this.z = z;
 
-            GridSystem.current.UpdateGridVal();
             return true;
         }
         return false;
@@ -150,7 +149,7 @@ public abstract class Building : MonoBehaviour,IBuilding
     /// <returns>true if the grid system successfully place the building at the this position</returns>
     public virtual bool placeAt(Vector3 worldPosition)
     {
-        bool isSuccess = GridSystem.current.setValue(worldPosition, new GridData(100, this), width, height);
+        bool isSuccess = GridSystem.current.setValue(worldPosition, 100, this, width, height);
         if (isSuccess)
         {
             int x, z;
@@ -162,7 +161,6 @@ public abstract class Building : MonoBehaviour,IBuilding
             this.x = x;
             this.z = z;
 
-            GridSystem.current.UpdateGridVal();
             return true;
         }
         return false;  
@@ -186,7 +184,7 @@ public abstract class Building : MonoBehaviour,IBuilding
             GameObject unit = Instantiate(trainableUnits[index], targetPosition, Quaternion.identity);
             Unit placeableComponent = unit.GetComponent<Unit>();
             //Can I update the grid date at another place?
-            GridSystem.current.setValue(TargetGrid.x, TargetGrid.y, new GridData(99, placeableComponent), placeableComponent.Size.x, placeableComponent.Size.y);
+            GridSystem.current.setValue(TargetGrid.x, TargetGrid.y, 99, placeableComponent, placeableComponent.Size.x, placeableComponent.Size.y);
         }
     }
 }

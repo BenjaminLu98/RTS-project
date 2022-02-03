@@ -93,6 +93,12 @@ public interface IUnit :IPlaceableObj
     /// <returns>Actual damage</returns>
     public float attack(int x, int z, float expectedDamage);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="expectedDamage"></param>
+    /// <param name="type"></param>
+    /// <returns></returns>
     public bool recieveDamage(float expectedDamage, DamageType type);
 
 }

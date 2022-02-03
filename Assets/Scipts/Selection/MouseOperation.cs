@@ -125,12 +125,8 @@ public class MouseOperation : MonoBehaviour
                         //Selectable layer
                         if (collder.gameObject.layer==7) map.add(collder.gameObject);
                     }
-
                 }
-
                 //Destroy(selectionBox, 0.02f);
-
-
                 dragSlection = false;
             }
         }

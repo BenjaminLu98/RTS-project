@@ -11,13 +11,14 @@ public class TestGridSystem : MonoBehaviour
     void Start()
     {
         //Debug.Log(x.ToString()+"  "+y.ToString());
-        GridSystem.current.InitializeGridVal();
+        //GridSystem.current.InitializeGridVal();
+        var gs = GridSystem.current;
     }
 
     // Update is called once per frame
     void Update()
     {
-        GridSystem.current.drawDebugLine();
+        //GridSystem.current.drawDebugLine();
         if (Input.GetMouseButtonDown(0))
         {
             //Vector3 position = GridUtils.ScreenToGridPlane(gridSystem);
@@ -46,7 +47,7 @@ public class TestGridSystem : MonoBehaviour
         {
             keep.produce(0);
         }
-        GridSystem.current.UpdateGridVal();
+        //GridSystem.current.UpdateGridVal();
     }
 
     private void LateUpdate()

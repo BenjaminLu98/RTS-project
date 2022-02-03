@@ -5,13 +5,13 @@ using UnityEngine;
 //TODO: generic
 public class GridSystem
 {
-    public Vector3 origin;
-    public int width = 10;
-    public int height = 10;
-    public float sideLength = 2f;
-    GridData[,] gridDataArray;
+    public static Vector3 origin;
+    public static int width = 100;
+    public static int height = 100;
+    public static float sideLength = 1f;
+    static GridData[,] gridDataArray;
 
-    public static GridSystem gridSystem=new GridSystem(Vector3.zero);
+    public static GridSystem gridSystem=new GridSystem();
     public static GridSystem current
     {
         get
@@ -20,14 +20,15 @@ public class GridSystem
         }
     }
 
-    public GridSystem(Vector3 origin)
+    static GridSystem()
     {
-        this.origin = origin;
+        origin = new Vector3(0, 0, 0);
         gridDataArray = new GridData[width, height];
-        for(int i=0; i < width; i++)
+        for(int i = 0; i < width; i++)
         {
-            for(int j = 0; j < height; j++){
-                gridDataArray[i, j] = new GridData();
+            for(int j = 0; j < height; j++)
+            {
+                gridDataArray[i, j] = new GridData(0, new Vector2Int(i, j), 1, CubeType.Grass);
             }
         }
     }
@@ -79,7 +80,7 @@ public class GridSystem
         {
             for (int j = 0; j < height; j++)
             {
-                GridUtils.createWorldText(gridDataArray[i, j].num.ToString(), new Vector3(origin.x + i * sideLength+0.5f*sideLength, origin.y, origin.z + j * sideLength + 0.5f * sideLength), "GridTexts", "GridVal"+i+"*"+j,1f ,1f, 7f);
+                GridUtils.createWorldText(gridDataArray[i, j].Num.ToString(), new Vector3(origin.x + i * sideLength+0.5f*sideLength, origin.y, origin.z + j * sideLength + 0.5f * sideLength), "GridTexts", "GridVal"+i+"*"+j,1f ,1f, 7f);
             }
         }
         
@@ -94,7 +95,7 @@ public class GridSystem
         {
             for (int j = 0; j < height; j++)
             {
-                GridUtils.updateWorldText(gridDataArray[i, j].num.ToString(), "GridTexts", "GridVal" + i + "*" + j);
+                GridUtils.updateWorldText(gridDataArray[i, j].Num.ToString(), "GridTexts", "GridVal" + i + "*" + j);
             }
         }
     }
@@ -124,7 +125,7 @@ public class GridSystem
     /// <param name="width"></param>
     /// <param name="height"></param>
     /// <returns></returns>
-    public bool setValue(int x, int z, GridData data, int width=1, int height=1)
+    public bool setValue(int x, int z, int num, IPlaceableObj placeable, int width=1, int height=1)
     {
         if (!checkWidthHeight(x, z, width, height))
         {
@@ -143,8 +144,9 @@ public class GridSystem
             {
                 for (int j = 0; j < height; j++)
                 {
-                    gridDataArray[x + i, z + j] = data;
-                    gridDataArray[x + i, z + j].isOccupied = true;
+                    gridDataArray[x + i, z + j].Num = num; 
+                    gridDataArray[x + i, z + j].PlaceableObj = placeable;
+                    gridDataArray[x + i, z + j].IsOccupied = true;
                 }
             }
             return true;
@@ -154,13 +156,13 @@ public class GridSystem
 
 
 
-    public bool setValue(Vector3 worldPosition, GridData data, int width = 1, int height = 1)
+    public bool setValue(Vector3 worldPosition, int num, IPlaceableObj placeable, int width = 1, int height = 1)
     {
         if (checkWorldPosition(worldPosition))
         {
             int x; int z;
             getXZ(worldPosition, out x, out z);
-            return setValue(x, z, data, width, height);
+            return setValue(x, z, num, placeable, width, height);
         }
         else return false;
     }
@@ -229,7 +231,7 @@ public class GridSystem
     /// <returns></returns>
     public bool checkWidthHeight(int x, int z, int width, int height)
     {
-        if (x >= 0 && z >= 0 && x + width <= this.width && z + height <= this.height) return true;
+        if (x >= 0 && z >= 0 && x + width <= GridSystem.width && z + height <= GridSystem.height) return true;
         else return false;
     }
 
@@ -248,7 +250,7 @@ public class GridSystem
         {
             for(int j = 0; j < height; j++)
             {
-                if (gridDataArray[x + i, z + j].isOccupied)
+                if (gridDataArray[x + i, z + j].IsOccupied)
                 {
                     return false;
                 }
@@ -274,7 +276,7 @@ public class GridSystem
         //check if there is a blank grid backward
         for(int i = 0; i < width; i++)
         {
-            if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < this.width && gridCoordinate.y >= 0 && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y].isOccupied)
+            if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < GridSystem.width && gridCoordinate.y >= 0 && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y].IsOccupied)
             {
                 return new Vector2Int(gridCoordinate.x + i, gridCoordinate.y);
             }
@@ -283,7 +285,7 @@ public class GridSystem
         //check if there is a blank grid left
         for(int j=0;j<height;j++)
         {
-            if(gridCoordinate.y + j>=0 && gridCoordinate.y + j < this.height && gridCoordinate.x >=0 && !gridDataArray[gridCoordinate.x, gridCoordinate.y+j].isOccupied)
+            if(gridCoordinate.y + j>=0 && gridCoordinate.y + j < GridSystem.height && gridCoordinate.x >=0 && !gridDataArray[gridCoordinate.x, gridCoordinate.y+j].IsOccupied)
             {
                 return new Vector2Int(gridCoordinate.x, gridCoordinate.y + j);
             }
@@ -292,7 +294,7 @@ public class GridSystem
         //check if there is a blank grid forward
         for (int i = 0; i < width; i++)
         {
-            if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < this.width && gridCoordinate.y + height - 1  < this.height && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y + height-1].isOccupied)
+            if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < GridSystem.width && gridCoordinate.y + height - 1  < GridSystem.height && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y + height-1].IsOccupied)
             {
                 return new Vector2Int(gridCoordinate.x + i, gridCoordinate.y + height -1);
             }
@@ -301,7 +303,7 @@ public class GridSystem
         //check if there is a blank grid right
         for (int j = 0; j < height; j++)
         {
-            if (gridCoordinate.y + j >= 0 && gridCoordinate.y + j < this.height && gridCoordinate.x + width -1 < this.width && !gridDataArray[gridCoordinate.x + width -1, gridCoordinate.y + j].isOccupied)
+            if (gridCoordinate.y + j >= 0 && gridCoordinate.y + j < GridSystem.height && gridCoordinate.x + width -1 < GridSystem.width && !gridDataArray[gridCoordinate.x + width -1, gridCoordinate.y + j].IsOccupied)
             {
                 return new Vector2Int(gridCoordinate.x + width -1, gridCoordinate.y + j);
             }
@@ -320,7 +322,7 @@ public class GridSystem
     public bool checkOccupation(int x, int z)
     {
         checkWidthHeight(x, z, 1, 1);
-        return !gridDataArray[x, z].isOccupied;
+        return !gridDataArray[x, z].IsOccupied;
     }
 
     /// <summary>
@@ -332,6 +334,6 @@ public class GridSystem
     public bool checkOccupationExcept(int x, int z, IPlaceableObj obj)
     {
         checkWidthHeight(x, z, 1, 1);
-        return !gridDataArray[x, z].isOccupied || obj.Equals(gridDataArray[x, z].placeableObj);
+        return !gridDataArray[x, z].IsOccupied || obj.Equals(gridDataArray[x, z].PlaceableObj);
     }
 }

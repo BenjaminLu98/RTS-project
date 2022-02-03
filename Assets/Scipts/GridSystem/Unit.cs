@@ -103,7 +103,7 @@ public abstract class Unit : MonoBehaviour, IUnit
                     transform.position = targetPosition;
                     isMoving = false;
                 }
-                GridSystem.current.setValue(transform.position, new GridData(10, this), width, height);
+                GridSystem.current.setValue(transform.position, 10, this, width, height);
                 
             }
         }   
@@ -146,7 +146,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     public bool placeAt(int x, int z)
     {
 
-        bool isSuccess = GridSystem.current.setValue(x, z, new GridData(100, this));
+        bool isSuccess = GridSystem.current.setValue(x, z, 100, this);
         if (isSuccess)
         {
             Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
@@ -165,7 +165,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     public bool placeAt(Vector3 worldPosition)
     {
        
-        bool isSuccess = GridSystem.current.setValue(worldPosition, new GridData(100, this), width, height);
+        bool isSuccess = GridSystem.current.setValue(worldPosition, 100, this, width, height);
         if (isSuccess)
         {
             int x, z;

@@ -14,8 +14,7 @@ public class GridUtils
     /// <returns></returns>
     public static Vector3 ScreenToGridPlane()
     {
-        GridSystem gridSystem = GridSystem.current;
-        Plane plane = new Plane(Vector3.up, gridSystem.origin);
+        Plane plane = new Plane(Vector3.up, GridSystem.origin);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         float distanceToPlane;
         if (plane.Raycast(ray, out distanceToPlane))
@@ -26,7 +25,6 @@ public class GridUtils
         {
             Debug.LogError("not on plane");
             return Vector3.zero;
-
         }
        
     }

@@ -6,8 +6,8 @@ public class Castle : Building
 {
     public Castle()
     {
-        width = 2;
-        height = 2;
+        width = 4;
+        height = 4;
     }
 
     private void Start()

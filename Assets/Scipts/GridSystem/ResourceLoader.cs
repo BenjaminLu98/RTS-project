@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ResourceLoader : Unit
+public class ResourceLoader:MonoBehaviour 
 {
     public  GameObject[] resourceList;
 
