@@ -17,8 +17,10 @@ public abstract class Unit : MonoBehaviour, IUnit
     protected float trueSpeed;
     protected Quaternion targetRotation;
     protected Transform modelTransform;
+    protected StateManager state;
+    protected TargetSelector ts;
 
-    private void Start()
+    protected void Start()
     {
         modelTransform = transform.GetChild(0);
     }
@@ -56,6 +58,7 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
     }
 
+    // TODO: this function should change the target position, not directly change the position. the state should handle the movement.
     //TODO: minimum rotation.
     public void moveTo(Vector3 WorldPosition, float speed)
     {
@@ -212,12 +215,11 @@ public abstract class Unit : MonoBehaviour, IUnit
 
     private void Update()
     {
+        state.onUpdate();
+
         if (isRotating||isMoving)
         {
             moveTo(targetPosition, trueSpeed);
         }
-
-        
     }
-
 }

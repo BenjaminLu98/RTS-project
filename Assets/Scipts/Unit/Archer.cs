@@ -10,4 +10,9 @@ public class Archer : Unit
         height = 1;
         animator = transform.GetChild(0).GetComponent<Animator>();
     }
+
+    private void Start()
+    {
+        base.Start();
+    }
 }
