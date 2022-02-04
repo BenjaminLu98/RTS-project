@@ -14,9 +14,23 @@ public class State
 
     public Dictionary<string, Func<bool>> Conditions { get => conditions; set => conditions = value; }
     public string Name { get => name; }
-    public Action OnStart { get => onStart; set => onStart = value; }
-    public Action OnStay { get => onStay; set => onStay = value; }
-    public Action OnExit { get => onExit; set => onExit = value; }
+
+    public State OnStart(Action action)
+    {
+        onStart = action;
+        return this;
+    }
+    public State OnStay(Action action)
+    {
+        onStay = action;
+        return this;
+    }
+
+    public State OnExit(Action action)
+    {
+        onExit = action;
+        return this;
+    }
 
     public State addCondition(string name, Func<bool> condition)
     {
@@ -28,7 +42,5 @@ public class State
     {
         this.name = name;
     }
-
-
 
 }
