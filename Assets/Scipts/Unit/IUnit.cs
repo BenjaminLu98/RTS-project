@@ -47,12 +47,6 @@ public interface IUnit :IPlaceableObj
         set;
     }
 
-    public float AttackSpeed
-    {
-        get;
-        set;
-    }
-
     public float AttackInterval
     {
         get;
@@ -75,7 +69,7 @@ public interface IUnit :IPlaceableObj
         get;
     }
 
-    // TODO: this function should change the target position, not directly change the position. the state should handle the movement.
+    
     /// <summary>
     /// Rotate to the target and move to the target position with animation. 
     /// </summary>

@@ -6,7 +6,7 @@ public class TargetSelector
 {
     public List<IUnit> getTarget()
     {
-        return new List<IUnit>();
+        return null;
     }
     
 }

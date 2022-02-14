@@ -14,16 +14,92 @@ public abstract class Unit : MonoBehaviour, IUnit
     protected int x;
     protected int z;
     protected Vector3 targetPosition;
-    protected float trueSpeed;
+    protected float trueSpeed=2.0f;
     protected Quaternion targetRotation;
     protected Transform modelTransform;
     protected StateManager state;
-    protected TargetSelector ts;
+    protected TargetSelector ts=new TargetSelector();
+    private float CountDown;
+    private Vector3 moveDirection;
+
 
     protected void Start()
     {
+        animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false);
+        targetPosition = transform.position;
+
         modelTransform = transform.GetChild(0);
+        targetRotation = modelTransform.rotation;
+
+        InitializeStateManager();
     }
+
+    // StateMachine configuration.
+    private void InitializeStateManager()
+    {
+        state = new StateManager();
+        state.addStatus("Idle", new State()
+            .OnStart(() => { CountDown = 4.0f; animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); Debug.Log("Idle onStart"); })
+            .OnStay(() => { if (CountDown > 0) CountDown -= Time.deltaTime; })
+            .OnExit(() => Debug.Log("exit idle"))
+            .addCondition("Rotate", () => !targetRotation.Equals(modelTransform.rotation))
+            .addCondition("Run", () => !targetPosition.Equals(transform.position))
+            .addCondition("Attack", () => ts.getTarget() != null && CountDown <= 0)
+            );
+
+        state.addStatus("Rotate", new State()
+            .addCondition("Idle", () => targetPosition.Equals(transform.position) && targetRotation.Equals(modelTransform.rotation))
+            .addCondition("Run", () => targetRotation.Equals(modelTransform.rotation) && !targetPosition.Equals(transform.position))
+            .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", true); Debug.Log("rotate onStart"); })
+            .OnStay(() =>
+            {
+                Quaternion tempRotation = Quaternion.RotateTowards(modelTransform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
+                modelTransform.rotation = tempRotation;
+            })
+            .OnExit(() => { Debug.Log("Rotate exit"); })
+            );
+        state.addStatus("Run", new State()
+            .addCondition("Idle", () => targetPosition.Equals(transform.position))
+            .addCondition("Attack", () => ts.getTarget() != null && CountDown <= 0)
+            .addCondition("Rotate", () => !targetRotation.Equals(modelTransform.rotation))
+            .OnStart(() => { CountDown = 2.0f; animator.SetBool("isRunning", true); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); ; Debug.Log("run onStart"); })
+            .OnStay(() =>
+            {
+                if (CountDown > 0) CountDown -= Time.deltaTime;
+                if (!targetPosition.Equals(transform.position) && GridSystem.current.checkOccupationExcept(x, z, this))
+                {
+                    GridSystem.current.removeValue(transform.position, width, height);
+
+                    //Make sure the unit will finally arrive exactly at the target position.
+                    if ((targetPosition - transform.position).magnitude > Time.deltaTime * trueSpeed)
+                    {
+                        transform.position += Time.deltaTime * trueSpeed * moveDirection;
+                    }
+                    else
+                    {
+                        transform.position = targetPosition;
+                        isMoving = false;
+                    }
+                    GridSystem.current.setValue(transform.position, 10, this, width, height);
+                }
+            })
+        );
+
+        state.addStatus("Attack", new State()
+            // TODO: add animation stop
+            .addCondition("Idle", () => targetPosition.Equals(transform.position))
+            .addCondition("Run", () => !targetPosition.Equals(transform.position))
+            .addCondition("Rotate", () => !targetRotation.Equals(modelTransform.rotation))
+            .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", true); animator.SetBool("isRotating", false); })
+            .OnStay(() =>
+            {
+
+            })
+            .OnExit(() => animator.SetBool("isAttacking", false))
+            );
+        state.Name = "Idle";
+    }
+
     public Vector2Int Position
     {
         get
@@ -65,51 +141,8 @@ public abstract class Unit : MonoBehaviour, IUnit
         int x, z;
         GridSystem.current.getXZ(WorldPosition, out x, out z);
         targetPosition = GridSystem.current.getWorldPosition(x, z);
-        Vector3 moveDirection = (targetPosition - transform.position).normalized;
-
-        if (speed > maxSpeed)
-        {
-            trueSpeed = maxSpeed;
-        }
-        else
-        {
-            trueSpeed = speed;
-        }
-
-        //Rotate.
+        moveDirection = (targetPosition - transform.position).normalized;
         targetRotation = Quaternion.LookRotation(moveDirection);
-
-        //If rotation is not complete, rotate first. Otherwise pass the rotation phase and do the Movement.
-        //Note that we rotate the model transform but translate the parent transform.
-        if (!targetRotation.Equals(modelTransform.rotation))
-        {
-            isRotating = true;
-            Quaternion tempRotation = Quaternion.RotateTowards(modelTransform.rotation, targetRotation, rotateSpeed*Time.deltaTime);
-            modelTransform.rotation = tempRotation;
-        }
-        else
-        {
-            isRotating = false;
-            //Move.
-            if (!targetPosition.Equals(transform.position) && GridSystem.current.checkOccupationExcept(x, z, this))
-            {
-                isMoving = true;
-                GridSystem.current.removeValue(transform.position, width, height);
-
-                //Make sure the unit will finally arrive exactly at the target position.
-                if ((targetPosition - transform.position).magnitude > Time.deltaTime * trueSpeed)
-                {
-                    transform.position += Time.deltaTime * trueSpeed * moveDirection;
-                }
-                else
-                {
-                    transform.position = targetPosition;
-                    isMoving = false;
-                }
-                GridSystem.current.setValue(transform.position, 10, this, width, height);
-                
-            }
-        }   
     }
 
     public void MoveTo(int x, int z, float speed)
@@ -133,7 +166,6 @@ public abstract class Unit : MonoBehaviour, IUnit
     public float PhysicalDefence { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
     public float MagicDefence { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
     public float Mana { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float AttackSpeed { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
     public float AttackInterval { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
     public float AttackRange { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 

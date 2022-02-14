@@ -37,11 +37,11 @@ public class TestGridSystem : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            archer.Animator.SetBool("isRunning", true);
+
         }
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            archer.Animator.SetBool("isRunning", false);
+
         }
         if (Input.GetKeyDown(KeyCode.A))
         {

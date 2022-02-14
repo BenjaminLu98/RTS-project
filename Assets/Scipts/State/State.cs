@@ -6,14 +6,17 @@ using UnityEngine;
 public class State
 {
     string name;
-    Dictionary<string, Func<bool>> conditions;
+    Dictionary<string, Func<bool>> conditions=new Dictionary<string, Func<bool>>();
 
-    Action onStart;
-    Action onStay;
-    Action onExit;
+    private static Action EmptyAction = () => { };
+
+    public Action onStart = EmptyAction;
+    public Action onStay = EmptyAction;
+    public Action onExit = EmptyAction;
+
 
     public Dictionary<string, Func<bool>> Conditions { get => conditions; set => conditions = value; }
-    public string Name { get => name; }
+    public string Name { get => name; set => name = value; }
 
     public State OnStart(Action action)
     {
@@ -36,11 +39,6 @@ public class State
     {
         Conditions.Add(name, condition);
         return this;
-    }
-
-    public State(string name)
-    {
-        this.name = name;
     }
 
 }

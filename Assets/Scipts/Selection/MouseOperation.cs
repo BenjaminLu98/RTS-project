@@ -18,13 +18,11 @@ public class MouseOperation : MonoBehaviour
     {
         dragSlection = false;
         map = GetComponent<SelectionMap>();
-
     }
 
     // Update is called once per frame
     void Update()
     {
-
         // Mouse is clicked down
         if (Input.GetMouseButtonDown(0))
         {
