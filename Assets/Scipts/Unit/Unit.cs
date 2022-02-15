@@ -5,14 +5,13 @@ using UnityEngine;
 public abstract class Unit : MonoBehaviour, IUnit
 {
     protected float hp;
-    //Note that you need to convert float hp to integer.
-    public int HP => throw new System.NotImplementedException();
-
     protected float rotateSpeed=180f;
     protected bool isMoving=false;
     protected bool isRotating=false;
     protected int x;
     protected int z;
+    protected int width;
+    protected int height;
     protected Vector3 targetPosition;
     protected float trueSpeed=2.0f;
     protected Quaternion targetRotation;
@@ -21,6 +20,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     protected TargetSelector ts=new TargetSelector();
     private float CountDown;
     private Vector3 moveDirection;
+    private float maxSpeed = 3f;
 
 
     protected void Start()
@@ -32,6 +32,121 @@ public abstract class Unit : MonoBehaviour, IUnit
         targetRotation = modelTransform.rotation;
 
         InitializeStateManager();
+    }
+    //Note that you need to convert float hp to integer.
+    public int HP => throw new System.NotImplementedException();
+
+    public Vector2Int Position
+    {
+        get
+        {
+            return new Vector2Int(x, z);
+        }
+    }
+
+    protected bool isObstacle;
+    public bool IsObstacle {
+        get
+        {
+            return isObstacle;
+        }
+        set
+        {
+            isObstacle = value;
+        }
+    }
+
+    public Vector2Int Size {
+        set
+        {
+            width = value.x;
+            height = value.y;
+        }
+        get
+        {
+            return new Vector2Int(width, height);
+        }
+    }
+
+    // TODO: this function should change the target position, not directly change the position. the state should handle the movement.
+    //TODO: minimum rotation.
+    public void moveTo(Vector3 WorldPosition, float speed)
+    {
+        int x, z;
+        GridSystem.current.getXZ(WorldPosition, out x, out z);
+        targetPosition = GridSystem.current.getWorldPosition(x, z);
+        moveDirection = (targetPosition - transform.position).normalized;
+        targetRotation = Quaternion.LookRotation(moveDirection);
+    }
+
+    public void MoveTo(int x, int z, float speed)
+    {
+        Vector3 targetPosition = GridSystem.current.getWorldPosition(x, z);
+        moveTo(targetPosition, speed);
+    }
+
+    protected Animator animator;
+
+    public Animator Animator
+    {
+        get
+        {
+            return animator;
+        }
+    }
+
+    public float PhysicalAttack { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float MagicAttack { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float PhysicalDefence { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float MagicDefence { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float Mana { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float AttackInterval { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float AttackRange { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
+    public float MaxSpeed
+    {
+        get
+        {
+            return maxSpeed;
+        }
+    }
+
+    public bool placeAt(int x, int z)
+    {
+
+        bool isSuccess = GridSystem.current.setValue(x, z, 100, this);
+        if (isSuccess)
+        {
+            Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
+            transform.position = truePosition;
+
+            GridSystem.current.removeValue(this.x, this.z, width, height);
+
+            this.x = x;
+            this.z = z;
+            return true;
+        }
+        return false;
+
+    }
+
+    public bool placeAt(Vector3 worldPosition)
+    {
+        bool isSuccess = GridSystem.current.setValue(worldPosition, 100, this, width, height);
+        if (isSuccess)
+        {
+            int x, z;
+            GridSystem.current.getXZ(worldPosition, out x, out z);
+            Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
+            transform.position = truePosition;
+
+            GridSystem.current.removeValue(this.x, this.z, width, height);
+            this.x = x;
+            this.z = z;
+            return true;
+        }
+        return false;
+
     }
 
     // StateMachine configuration.
@@ -100,123 +215,6 @@ public abstract class Unit : MonoBehaviour, IUnit
         state.Name = "Idle";
     }
 
-    public Vector2Int Position
-    {
-        get
-        {
-            return new Vector2Int(x, z);
-        }
-    }
-
-    protected bool isObstacle;
-    public bool IsObstacle {
-        get
-        {
-            return isObstacle;
-        }
-        set
-        {
-            isObstacle = value;
-        }
-    }
-
-    protected int width;
-    protected int height;
-    public Vector2Int Size {
-        set
-        {
-            width = value.x;
-            height = value.y;
-        }
-        get
-        {
-            return new Vector2Int(width, height);
-        }
-    }
-
-    // TODO: this function should change the target position, not directly change the position. the state should handle the movement.
-    //TODO: minimum rotation.
-    public void moveTo(Vector3 WorldPosition, float speed)
-    {
-        int x, z;
-        GridSystem.current.getXZ(WorldPosition, out x, out z);
-        targetPosition = GridSystem.current.getWorldPosition(x, z);
-        moveDirection = (targetPosition - transform.position).normalized;
-        targetRotation = Quaternion.LookRotation(moveDirection);
-    }
-
-    public void MoveTo(int x, int z, float speed)
-    {
-        Vector3 targetPosition = GridSystem.current.getWorldPosition(x, z);
-        moveTo(targetPosition, speed);
-    }
-
-    protected Animator animator;
-
-    public Animator Animator
-    {
-        get
-        {
-            return animator;
-        }
-    }
-
-    public float PhysicalAttack { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float MagicAttack { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float PhysicalDefence { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float MagicDefence { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float Mana { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float AttackInterval { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float AttackRange { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-
-    float maxSpeed = 3f;
-    public float MaxSpeed
-    {
-        get
-        {
-            return maxSpeed;
-        }
-    }
-
-    public bool placeAt(int x, int z)
-    {
-
-        bool isSuccess = GridSystem.current.setValue(x, z, 100, this);
-        if (isSuccess)
-        {
-            Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
-            transform.position = truePosition;
-
-            GridSystem.current.removeValue(this.x, this.z, width, height);
-
-            this.x = x;
-            this.z = z;
-            return true;
-        }
-        return false;
-
-    }
-
-    public bool placeAt(Vector3 worldPosition)
-    {
-       
-        bool isSuccess = GridSystem.current.setValue(worldPosition, 100, this, width, height);
-        if (isSuccess)
-        {
-            int x, z;
-            GridSystem.current.getXZ(worldPosition, out x, out z);
-            Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
-            transform.position = truePosition;
-
-            GridSystem.current.removeValue(this.x, this.z, width, height);
-            this.x = x;
-            this.z = z;
-            return true;
-        }
-        return false;
-
-    }
-
     public float attack(int x, int z, float expectedDamage)
     {
         if(GridSystem.current.checkOccupation(x, z))
@@ -244,14 +242,8 @@ public abstract class Unit : MonoBehaviour, IUnit
         return true;
     }
 
-
     private void Update()
     {
         state.onUpdate();
-
-        if (isRotating||isMoving)
-        {
-            moveTo(targetPosition, trueSpeed);
-        }
     }
 }
