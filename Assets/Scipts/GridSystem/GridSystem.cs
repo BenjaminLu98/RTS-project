@@ -133,7 +133,7 @@ public class GridSystem
             return false;
         }
         //TODO: Add UI hint.
-        else if (!checkOccupation(x, z, width, height))
+        else if (!checkOccupationExcept(x, z, width, height,placeable))
         {
             Debug.LogError("At least one grid is already occupied!");
             return false;
@@ -335,5 +335,21 @@ public class GridSystem
     {
         checkWidthHeight(x, z, 1, 1);
         return !gridDataArray[x, z].IsOccupied || obj.Equals(gridDataArray[x, z].PlaceableObj);
+    }
+
+    public bool checkOccupationExcept(int x, int z, int width, int height, IPlaceableObj obj)
+    {
+        if (!checkWidthHeight(x, z, width, height)) return false;
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                if (gridDataArray[x + i, z + j].IsOccupied && !obj.Equals(gridDataArray[x,z].PlaceableObj))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

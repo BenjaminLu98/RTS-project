@@ -99,8 +99,6 @@ public class MouseOperation : MonoBehaviour
                 {
                     Vector3 p1w = p1Hit.point;
                     Vector3 p2w = p2Hit.point;
-                    Debug.DrawLine(p1w, p2w);
-                    Debug.LogWarning("p1w:" + p1w + ", p2w:" + p2w);
                     if (p1w.y > p2w.y)
                     {
                         p1w.y = p2w.y;
@@ -119,7 +117,6 @@ public class MouseOperation : MonoBehaviour
                     
                     foreach(Collider collder in colliders)
                     {
-                        Debug.LogWarning(collder.gameObject.layer);
                         //Selectable layer
                         if (collder.gameObject.layer==7) map.add(collder.gameObject);
                     }

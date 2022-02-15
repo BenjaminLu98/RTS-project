@@ -1,41 +1,49 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public abstract class Unit : MonoBehaviour, IUnit
 {
     protected float hp;
-    protected float rotateSpeed=180f;
-    protected bool isMoving=false;
-    protected bool isRotating=false;
+    protected float rotateSpeed = 180f;
+    protected bool isMoving = false;
+    protected bool isRotating = false;
     protected int x;
     protected int z;
+    protected int nextX;
+    protected int nextZ;
     protected int width;
     protected int height;
     protected Vector3 targetPosition;
-    protected float trueSpeed=2.0f;
-    protected Quaternion targetRotation;
+    protected Vector3 nextPosition;
+    protected float trueSpeed = 2.0f;
+    protected Quaternion faceRotation;
     protected Transform modelTransform;
     protected StateManager state;
-    protected TargetSelector ts=new TargetSelector();
+    protected TargetSelector ts = new TargetSelector();
+    protected Action onDeath;
     private float CountDown;
-    private Vector3 moveDirection;
+    private IUnit.dir faceDirection;
     private float maxSpeed = 3f;
+    
 
 
     protected void Start()
     {
         animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false);
         targetPosition = transform.position;
-
+        nextPosition = transform.position;
         modelTransform = transform.GetChild(0);
-        targetRotation = modelTransform.rotation;
+        faceRotation = modelTransform.rotation;
 
         InitializeStateManager();
     }
     //Note that you need to convert float hp to integer.
-    public int HP => throw new System.NotImplementedException();
-
+    public int HP {
+        get
+        {
+            return Mathf.RoundToInt(hp);
+        }            
+    }
     public Vector2Int Position
     {
         get
@@ -68,18 +76,41 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
     }
 
-    // TODO: this function should change the target position, not directly change the position. the state should handle the movement.
+    /// <summary>
+    /// Check if targetPosition is occupied by other placeable object. 
+    /// If yes, it find another blank grid and update the targetPosition and targetRotation.
+    /// </summary>
+    void CheckTargetOccupation()
+    {
+        int x, z;
+        GridSystem.current.getXZ(targetPosition, out x, out z);
+
+        if (!GridSystem.current.checkOccupationExcept(x, z, width, height,this))
+        {
+            var blank = GridSystem.current.getBlankGrid(new Vector2Int(x, z), width, height);
+            targetPosition = GridSystem.current.getWorldPosition(blank.x, blank.y);
+            //UpdateDir();
+        }
+    }
+
     //TODO: minimum rotation.
     public void moveTo(Vector3 WorldPosition, float speed)
     {
         int x, z;
         GridSystem.current.getXZ(WorldPosition, out x, out z);
         targetPosition = GridSystem.current.getWorldPosition(x, z);
-        moveDirection = (targetPosition - transform.position).normalized;
-        targetRotation = Quaternion.LookRotation(moveDirection);
+
+        if(!GridSystem.current.checkOccupationExcept(x, z,width,height,this))
+        {
+            var blank = GridSystem.current.getBlankGrid(new Vector2Int(x,z),width,height);
+            targetPosition = GridSystem.current.getWorldPosition(blank.x, blank.y);
+        }
+
+        //faceDirection = getDir();
+        //faceRotation = getDirRotation(faceDirection);
     }
 
-    public void MoveTo(int x, int z, float speed)
+    public void moveTo(int x, int z, float speed)
     {
         Vector3 targetPosition = GridSystem.current.getWorldPosition(x, z);
         moveTo(targetPosition, speed);
@@ -113,8 +144,7 @@ public abstract class Unit : MonoBehaviour, IUnit
 
     public bool placeAt(int x, int z)
     {
-
-        bool isSuccess = GridSystem.current.setValue(x, z, 100, this);
+        bool isSuccess = GridSystem.current.setValue(x, z, 100, this, width, height);
         if (isSuccess)
         {
             Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
@@ -157,54 +187,87 @@ public abstract class Unit : MonoBehaviour, IUnit
             .OnStart(() => { CountDown = 4.0f; animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); Debug.Log("Idle onStart"); })
             .OnStay(() => { if (CountDown > 0) CountDown -= Time.deltaTime; })
             .OnExit(() => Debug.Log("exit idle"))
-            .addCondition("Rotate", () => !targetRotation.Equals(modelTransform.rotation))
+            .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Run", () => !targetPosition.Equals(transform.position))
             .addCondition("Attack", () => ts.getTarget() != null && CountDown <= 0)
             );
 
         state.addStatus("Rotate", new State()
-            .addCondition("Idle", () => targetPosition.Equals(transform.position) && targetRotation.Equals(modelTransform.rotation))
-            .addCondition("Run", () => targetRotation.Equals(modelTransform.rotation) && !targetPosition.Equals(transform.position))
+            .addCondition("Idle", () => targetPosition.Equals(transform.position) && faceRotation.Equals(modelTransform.rotation))
+            .addCondition("Run", () => faceRotation.Equals(modelTransform.rotation) && !targetPosition.Equals(transform.position))
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", true); Debug.Log("rotate onStart"); })
             .OnStay(() =>
             {
-                Quaternion tempRotation = Quaternion.RotateTowards(modelTransform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
+                Quaternion tempRotation = Quaternion.RotateTowards(modelTransform.rotation, faceRotation, rotateSpeed * Time.deltaTime);
                 modelTransform.rotation = tempRotation;
             })
             .OnExit(() => { Debug.Log("Rotate exit"); })
             );
         state.addStatus("Run", new State()
+            .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Idle", () => targetPosition.Equals(transform.position))
             .addCondition("Attack", () => ts.getTarget() != null && CountDown <= 0)
-            .addCondition("Rotate", () => !targetRotation.Equals(modelTransform.rotation))
             .OnStart(() => { CountDown = 2.0f; animator.SetBool("isRunning", true); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); ; Debug.Log("run onStart"); })
             .OnStay(() =>
             {
-                if (CountDown > 0) CountDown -= Time.deltaTime;
-                if (!targetPosition.Equals(transform.position) && GridSystem.current.checkOccupationExcept(x, z, this))
+                // 第一次没事 第二次出问题
+                if (nextPosition.Equals(transform.position))
                 {
-                    GridSystem.current.removeValue(transform.position, width, height);
+                    Debug.Log("before!" + nextX + " " + nextZ + ", " + x + " " + z);
+                    CheckTargetOccupation();
+                    updateNextPositon();
+                    GridSystem.current.setValue(nextX, nextZ, 1, this, width, height);
 
-                    //Make sure the unit will finally arrive exactly at the target position.
-                    if ((targetPosition - transform.position).magnitude > Time.deltaTime * trueSpeed)
-                    {
-                        transform.position += Time.deltaTime * trueSpeed * moveDirection;
-                    }
-                    else
-                    {
-                        transform.position = targetPosition;
-                        isMoving = false;
-                    }
-                    GridSystem.current.setValue(transform.position, 10, this, width, height);
+                    Debug.Log("middle!" + nextX + " " + nextZ+", "+x+" "+z);
+                    // Update moveDirection and targetRotation
+                    faceDirection = getDir(new Vector2Int(this.x, this.z), new Vector2Int(nextX, nextZ));
+                    faceRotation = getDirRotation(faceDirection);
+                   
+                    
                 }
+                else
+                {
+                    MoveToNextPosition();
+                    GridSystem.current.getXZ(transform.position, out this.x, out this.z);
+                }
+
+                //// update target location and rotation
+                //if (CountDown > 0) CountDown -= Time.deltaTime;
+                //// get next x next z
+
+                ////if (!targetPosition.Equals(transform.position) && GridSystem.current.checkOccupationExcept(x, z, this))
+                //// move until equals next x next z
+                //if (!targetPosition.Equals(transform.position))
+                //{
+
+                //    updateTargetLocationRotation();
+
+                //    // move to next x next z
+                //    MoveToTargetPosition();
+
+                    
+
+
+                //    int nx, nz;
+                //    GridSystem.current.getXZ(transform.position, out nx, out nz);
+                //    if (nx != this.x || nz != this.z)
+                //    {
+                //        moveDirection = getDir();
+                //        targetRotation = getDirRotation(moveDirection);
+                //    }
+                //    this.x = nx;
+                //    this.z = nz;
+
+                //}
             })
+            .OnExit(() => { Debug.Log("Run exit"); })
         );
 
         state.addStatus("Attack", new State()
             // TODO: add animation stop
             .addCondition("Idle", () => targetPosition.Equals(transform.position))
             .addCondition("Run", () => !targetPosition.Equals(transform.position))
-            .addCondition("Rotate", () => !targetRotation.Equals(modelTransform.rotation))
+            .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", true); animator.SetBool("isRotating", false); })
             .OnStay(() =>
             {
@@ -215,35 +278,236 @@ public abstract class Unit : MonoBehaviour, IUnit
         state.Name = "Idle";
     }
 
-    public float attack(int x, int z, float expectedDamage)
+    private void updateNextPositon()
     {
-        if(GridSystem.current.checkOccupation(x, z))
+        switch (getDir())
         {
-            Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod()+":No unit in the target position(${x},${z})");
-            return 0;
+            case IUnit.dir.forward:
+                if (GridSystem.current.checkOccupationExcept(x, z + 1, width, height,this))
+                {
+                    nextX = x;
+                    nextZ = z + 1;
+                }
+                else
+                {
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x, z + 1), width, height);
+                    nextX = newXZ.x;
+                    nextZ = newXZ.y;
+                }
+                break;
+            case IUnit.dir.right:
+                if (GridSystem.current.checkOccupationExcept(x + 1, z, width, height,this))
+                {
+                    nextX = x + 1;
+                    nextZ = z;
+                }
+                else
+                {
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x + 1, z), width, height);
+                    nextX = newXZ.x;
+                    nextZ = newXZ.y;
+                }
+                break;
+            case IUnit.dir.backward:
+                if (GridSystem.current.checkOccupationExcept(x, z - 1, width, height,this))
+                {
+                    nextX = x;
+                    nextZ = z - 1;
+                }
+                else
+                {
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x, z - 1), width, height);
+                    nextX = newXZ.x;
+                    nextZ = newXZ.y;
+                }
+                break;
+            case IUnit.dir.left:
+                if (GridSystem.current.checkOccupationExcept(x - 1, z, width, height,this))
+                {
+                    nextX = x - 1;
+                    nextZ = z;
+                }
+                else
+                {
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x - 1, z), width, height);
+                    nextX = newXZ.x;
+                    nextZ = newXZ.y;
+                }
+                break;
         }
+        nextPosition = GridSystem.current.getWorldPosition(nextX, nextZ);
+    }
+
+    // Update transform.position until it equals to NextPosition. It will keep remove Value and set value to update GridVal.
+    private void MoveToNextPosition()
+    {
+        GridSystem.current.removeValue(transform.position, width, height);
+
+        //Make sure the unit will finally arrive exactly at the next position.
+        if ((nextPosition - transform.position).magnitude > Time.deltaTime * trueSpeed)
+        {
+            transform.position += Time.deltaTime * trueSpeed * getDirVector(faceDirection);
+        }
+        else
+        {
+            transform.position = nextPosition;
+            isMoving = false;
+        }
+        GridSystem.current.setValue(transform.position, 10, this, width, height);
+    }
+
+    public float attack(float expectedDamage, IUnit.DamageType type)
+    {
         //Find the target unit
-
+        var target = ts.getTarget();
         //deal damage
-
+        target.recieveDamage(expectedDamage, type);
         //return actual damage
         return 0;
     }
 
     public bool recieveDamage(float expectedDamage, IUnit.DamageType type)
     {
+        float damage = 0f;
         //calculate actual damage
-
+        switch (type)
+        {
+            case IUnit.DamageType.Magic:
+                damage = (1 - MagicDefence) * expectedDamage;
+                break;
+            case IUnit.DamageType.Physical:
+                damage =Mathf.Clamp(expectedDamage - PhysicalDefence,0,10000f);
+                break;
+        }
         //apply damage
+        hp -= Mathf.Clamp(damage,0.0f,100.0f);
 
         //if the damage is greater than hp, then the unit will die.
-
+        if (hp.Equals(0.0f)) onDeath();
 
         return true;
     }
 
     private void Update()
     {
+        //Debug.Log("transform.position" + transform.position + "targetPosition" + targetPosition + state.Name+"nextPosition"+nextPosition);
         state.onUpdate();
+        
+    }
+
+    // Convert direction to Rotation.
+    private Quaternion getDirRotation(IUnit.dir dir)
+    {
+        switch (dir)
+        {
+            case IUnit.dir.forward:
+                return Quaternion.LookRotation(Vector3.forward);
+            case IUnit.dir.right:
+                return Quaternion.LookRotation(Vector3.right);
+            case IUnit.dir.backward:
+                return Quaternion.LookRotation(Vector3.back);
+            case IUnit.dir.left:
+                return Quaternion.LookRotation(Vector3.left);
+        }
+        Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + ": no matching direction");
+        return Quaternion.LookRotation(Vector3.forward);
+    }
+
+    // Get the normalized direction vector from the enum direction.
+    private Vector3 getDirVector(IUnit.dir dir)
+    {
+        switch (dir)
+        {
+            case IUnit.dir.forward:
+                return Vector3.forward;
+            case IUnit.dir.right:
+                return Vector3.right;
+            case IUnit.dir.backward:
+                return Vector3.back;
+            case IUnit.dir.left:
+                return Vector3.left;
+        }
+        Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + ": no matching direction");
+        return Vector3.forward;
+    }
+
+    // Convert a vector(from->to ) to the four direction.
+    IUnit.dir getDir(Vector2Int from, Vector2Int to) 
+    {
+        var fromPosition = GridSystem.current.getWorldPosition(from.x, from.y);
+        var toPosition = GridSystem.current.getWorldPosition(to.x, to.y);
+
+        float zDeg = Vector3.Angle(Vector3.forward, toPosition - fromPosition);
+        float xDeg = Vector3.Angle(Vector3.right, toPosition - fromPosition);
+
+        if (xDeg < 90f)
+        {
+            if (zDeg < 45f)
+            {
+                return IUnit.dir.forward;
+            }
+            else if (zDeg < 135f)
+            {
+                return IUnit.dir.right;
+            }
+            else
+            {
+                return IUnit.dir.backward;
+            }
+        }
+        else
+        {
+            if (zDeg < 45f)
+            {
+                return IUnit.dir.forward;
+            }
+            else if (zDeg < 135f)
+            {
+                return IUnit.dir.left;
+            }
+            else
+            {
+                return IUnit.dir.backward;
+            }
+        }
+    }
+
+    // Convert the real target direction to four target direction.
+    // TODO: substitute it with Path finding algorithm.
+    IUnit.dir getDir()
+    {
+        float zDeg = Vector3.Angle(Vector3.forward, targetPosition - transform.position);
+        float xDeg = Vector3.Angle(Vector3.right, targetPosition - transform.position);
+
+        if (xDeg < 90f)
+        {
+            if (zDeg < 45f)
+            {
+                return IUnit.dir.forward;
+            }
+            else if(zDeg<135f)
+            {
+                return IUnit.dir.right;
+            }
+            else
+            {
+                return IUnit.dir.backward;
+            }
+        }
+        else
+        {
+            if (zDeg < 45f)
+            {
+                return IUnit.dir.forward;
+            }
+            else if (zDeg < 135f)
+            {
+                return IUnit.dir.left;
+            }
+            else
+            {
+                return IUnit.dir.backward;
+            }
+        }
     }
 }

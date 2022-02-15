@@ -184,7 +184,9 @@ public abstract class Building : MonoBehaviour,IBuilding
             GameObject unit = Instantiate(trainableUnits[index], targetPosition, Quaternion.identity);
             Unit placeableComponent = unit.GetComponent<Unit>();
             //Can I update the grid date at another place?
-            GridSystem.current.setValue(TargetGrid.x, TargetGrid.y, 99, placeableComponent, placeableComponent.Size.x, placeableComponent.Size.y);
+            //GridSystem.current.setValue(TargetGrid.x, TargetGrid.y, 99, placeableComponent, placeableComponent.Size.x, placeableComponent.Size.y);
+            placeableComponent.placeAt(TargetGrid.x, TargetGrid.y);
+
         }
     }
 }

@@ -6,14 +6,31 @@ public class TestGridSystem : MonoBehaviour
 {
     [SerializeField] public Building keep;
     [SerializeField] public Building keep2;
-    [SerializeField] public Archer archer;
+    [SerializeField] public GameObject crossbow;
     // Start is called before the first frame update
     void Start()
     {
         //Debug.Log(x.ToString()+"  "+y.ToString());
         //GridSystem.current.InitializeGridVal();
         var gs = GridSystem.current;
+
+        var crossbow1OBJ = Instantiate(crossbow);
+        var crossBow1 = crossbow1OBJ.GetComponent<Archer>();
+        crossBow1.placeAt(3, 4);
+
+        var crossbow2OBJ = Instantiate(crossbow);
+        var crossBow2 = crossbow2OBJ.GetComponent<Archer>();
+        crossBow2.placeAt(10, 4);
+
+        var crossbow3OBJ = Instantiate(crossbow);
+        var crossBow3 = crossbow3OBJ.GetComponent<Archer>();
+        crossBow3.placeAt(6, 3);
+
+
+
+
     }
+
 
     // Update is called once per frame
     void Update()
