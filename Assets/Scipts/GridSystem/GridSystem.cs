@@ -35,15 +35,20 @@ public class GridSystem
 
     //Get the world position of grid(x,z). x is [0,width), z is [0,heihgt)
     public Vector3 getWorldPosition(int x, int z) {
-        if (x > width)
+        if (!checkWidthHeight(x,z))
         {
-            Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + $": x({x}) out of range! ");
+            Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + $": x({x}) z({z}) out of range! ");
         }
-        if (z > height)
+        if (getGridData(x, z) != null)
         {
-            Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + $": z({z}) out of range! ");
+            return new Vector3(x * sideLength, getGridData(x, z).Height * sideLength, z * sideLength) + origin;
         }
-        return new Vector3(x * sideLength, 0f, z * sideLength) + origin;
+        else
+        {
+            Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + $": x({x}) z({z}) data is null! ");
+            return new Vector3(0, 0, 0);
+        }
+        
     }
 
     /// <summary>
@@ -125,7 +130,7 @@ public class GridSystem
     /// <param name="width"></param>
     /// <param name="height"></param>
     /// <returns></returns>
-    public bool setValue(int x, int z, int num, IPlaceableObj placeable, int width=1, int height=1)
+    public bool setValue(int x, int z, int num, IPlaceableObj placeable,  int width=1, int height=1)
     {
         if (!checkWidthHeight(x, z, width, height))
         {
@@ -166,6 +171,34 @@ public class GridSystem
         }
         else return false;
     }
+
+    public bool setHeight(int x,int z,int height)
+    {
+        if (height >= 0)
+        {
+            if (checkWidthHeight(x, z))
+            {
+                gridDataArray[x, z].Height = height;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int getHeight(int x, int z)
+    {
+
+        if (checkWidthHeight(x, z))
+        {
+            return gridDataArray[x, z].Height;
+        }
+        else
+        {
+            return 0;
+        }
+
+    }
+
 
     /// <summary>
     /// remove all the grid data within the width*height rectangle at (x,z)
@@ -229,7 +262,7 @@ public class GridSystem
     /// <param name="width">how many grids horizontally in the rect</param>
     /// <param name="height">how many grids vertically in the rect</param>
     /// <returns></returns>
-    public bool checkWidthHeight(int x, int z, int width, int height)
+    public bool checkWidthHeight(int x, int z, int width = 1, int height = 1)
     {
         if (x >= 0 && z >= 0 && x + width <= GridSystem.width && z + height <= GridSystem.height) return true;
         else return false;
@@ -344,12 +377,22 @@ public class GridSystem
         {
             for (int j = 0; j < height; j++)
             {
-                if (gridDataArray[x + i, z + j].IsOccupied && !obj.Equals(gridDataArray[x,z].PlaceableObj))
+                if (gridDataArray[x + i, z + j].IsOccupied && (obj.Equals(null)||!obj.Equals(gridDataArray[x,z].PlaceableObj)))
                 {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    public GridData getGridData(int x, int z)
+    {
+        if (!checkWidthHeight(x, z))
+        {
+            Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod() + ": (" + x + "," + z + ") is not a valid position in the grid system");
+            return null;
+        }
+        return gridDataArray[x, z];
     }
 }

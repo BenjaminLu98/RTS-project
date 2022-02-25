@@ -13,16 +13,26 @@ public class GridData
     private IPlaceableObj placeableObj;
     private bool isOccupied;
     private List<Cube> cube;
-    // Lowest height is 0, normally it is 1.
-    private int height;
+    // Lowest height is 0, normally it is 1. Actual height should be height*sideLength
+    private int height=1;
     private Vector2Int position;
 
-    
+    private int gCost;
+    private int hCost;
+    private int fCost;
+
+
+
+
     public int Num { get => num; set => num = value; }
     // Judge by placeable OBJ?
     public bool IsOccupied { get => isOccupied; set => isOccupied = value; }
     public IPlaceableObj PlaceableObj { get => placeableObj; set => placeableObj = value; }
     public List<Cube> Cube { get => cube; set => cube = value; }
+    public int GCost { get => gCost; set => gCost = value; }
+    public int HCost { get => hCost; set => hCost = value; }
+    public int FCost { get => fCost; set => fCost = value; }
+    public int Height { get => height; set => height = value; }
 
     public GridData()
     {
@@ -51,11 +61,14 @@ public class GridData
         this.height = height;
         cube = new List<Cube>();
         this.position = position;
+
+        var worldPosition = new Vector3(position.x * GridSystem.sideLength, height * GridSystem.sideLength, position.y * GridSystem.sideLength) + GridSystem.origin;
+
         for (int i = 0; i < height; i++)
         {
-            cube.Add(new Cube(CubeType.Base, position));
+            cube.Add(new Cube(CubeType.Base, worldPosition));
         }
-        cube.Add(new Cube(cubeType, position));
+        cube.Add(new Cube(cubeType, worldPosition));
     }
 
     public GridData(GridSystem gs, int num, Vector2Int position, IPlaceableObj placeableObj, int height, CubeType cubeType)
@@ -65,11 +78,14 @@ public class GridData
         this.height = height;
         cube = new List<Cube>();
         this.position = position;
+
+        var worldPosition = new Vector3(position.x * GridSystem.sideLength, height * GridSystem.sideLength, position.y * GridSystem.sideLength) + GridSystem.origin;
+
         for (int i = 0; i < height-1; i++)
         {
-            cube.Add(new Cube(CubeType.Base, position));
+            cube.Add(new Cube(CubeType.Base, worldPosition));
         }
-        cube.Add(new Cube(cubeType, position));
+        cube.Add(new Cube(cubeType, worldPosition));
     }
 
 
@@ -83,12 +99,12 @@ public class Cube
     CubeType cubeType;
     GameObject prefab;
     GameObject instance;
-    public Cube(CubeType cubeType, Vector2Int position)
+    public Cube(CubeType cubeType, Vector3 worldPosition)
     {
         this.cubeType = cubeType;
         prefab = Resources.Load<GameObject>("Map/" + cubeType.ToString());
         if (!prefab) Debug.LogError("Fail to load resource:" + cubeType.ToString());
-        instance = GameObject.Instantiate(prefab, GridSystem.current.getWorldPosition(position.x, position.y), Quaternion.identity);
+        instance = GameObject.Instantiate(prefab, worldPosition, Quaternion.identity);
     }
 
 
