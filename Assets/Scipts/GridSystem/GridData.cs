@@ -20,6 +20,7 @@ public class GridData
     private int gCost;
     private int hCost;
     private int fCost;
+    public GridData comeFromNode;
 
 
 
@@ -33,25 +34,26 @@ public class GridData
     public int HCost { get => hCost; set => hCost = value; }
     public int FCost { get => fCost; set => fCost = value; }
     public int Height { get => height; set => height = value; }
+    public Vector2Int Position { get => position; set => position = value; }
 
     public GridData()
     {
         this.Num = 0;
-        position = new Vector2Int(0, 0);
+        Position = new Vector2Int(0, 0);
     }
 
     // Start is called before the first frame update
     public GridData(int num)
     {
         this.Num = num;
-        position = new Vector2Int(0, 0);
+        Position = new Vector2Int(0, 0);
     }
     public GridData(int num, Vector2Int position, IPlaceableObj placeableObj, int height)
     {
         this.Num = num;
         this.PlaceableObj = placeableObj;
         this.height = height;
-        this.position = position;
+        this.Position = position;
     }
 
     public GridData(int num, Vector2Int position, int height, CubeType cubeType)
@@ -60,7 +62,7 @@ public class GridData
         this.PlaceableObj = placeableObj;
         this.height = height;
         cube = new List<Cube>();
-        this.position = position;
+        this.Position = position;
 
         var worldPosition = new Vector3(position.x * GridSystem.sideLength, height * GridSystem.sideLength, position.y * GridSystem.sideLength) + GridSystem.origin;
 
@@ -77,7 +79,7 @@ public class GridData
         this.PlaceableObj = placeableObj;
         this.height = height;
         cube = new List<Cube>();
-        this.position = position;
+        this.Position = position;
 
         var worldPosition = new Vector3(position.x * GridSystem.sideLength, height * GridSystem.sideLength, position.y * GridSystem.sideLength) + GridSystem.origin;
 
@@ -88,6 +90,10 @@ public class GridData
         cube.Add(new Cube(cubeType, worldPosition));
     }
 
+    public void calculateFCost()
+    {
+        fCost = gCost + hCost;
+    }
 
 }
 

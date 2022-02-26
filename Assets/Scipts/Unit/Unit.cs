@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Unit : MonoBehaviour, IUnit
@@ -21,6 +22,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     protected StateManager state;
     protected TargetSelector ts = new TargetSelector();
     protected Action onDeath;
+    protected PathFinding pf;
     private float CountDown;
     private IUnit.dir faceDirection;
     private float maxSpeed = 3f;
@@ -34,7 +36,7 @@ public abstract class Unit : MonoBehaviour, IUnit
         nextPosition = transform.position;
         modelTransform = transform.GetChild(0);
         faceRotation = modelTransform.rotation;
-
+        pf = new PathFinding();
         InitializeStateManager();
     }
     //Note that you need to convert float hp to integer.
@@ -80,7 +82,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     /// Check if targetPosition is occupied by other placeable object. 
     /// If yes, it find another blank grid and update the targetPosition and targetRotation.
     /// </summary>
-    void CheckTargetOccupation()
+    void CheckTargetOccupationAndUpdate()
     {
         int x, z;
         GridSystem.current.getXZ(targetPosition, out x, out z);
@@ -89,7 +91,6 @@ public abstract class Unit : MonoBehaviour, IUnit
         {
             var blank = GridSystem.current.getBlankGrid(new Vector2Int(x, z), width, height);
             targetPosition = GridSystem.current.getWorldPosition(blank.x, blank.y);
-            //UpdateDir();
         }
     }
 
@@ -210,55 +211,27 @@ public abstract class Unit : MonoBehaviour, IUnit
             .OnStart(() => { CountDown = 2.0f; animator.SetBool("isRunning", true); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); ; Debug.Log("run onStart"); })
             .OnStay(() =>
             {
-                // 第一次没事 第二次出问题
                 if (nextPosition.Equals(transform.position))
                 {
-                    Debug.Log("before!" + nextX + " " + nextZ + ", " + x + " " + z);
-                    CheckTargetOccupation();
-                    updateNextPositon();
-                    GridSystem.current.setValue(nextX, nextZ, 1, this, width, height);
+                    CheckTargetOccupationAndUpdate();
 
-                    Debug.Log("middle!" + nextX + " " + nextZ+", "+x+" "+z);
+                    // TODO: update this logic so that find path can be called less frequently.
+                    int targetX, targetY;
+                    GridSystem.current.getXZ(targetPosition, out targetX, out targetY);
+                    var path = pf.FindPath(x, z, targetX, targetY);
+
                     // Update moveDirection and targetRotation
-                    faceDirection = getDir(new Vector2Int(this.x, this.z), new Vector2Int(nextX, nextZ));
+                    faceDirection = GetDirWithPF(path);
                     faceRotation = getDirRotation(faceDirection);
-                   
-                    
+                    updateNextPositonWithPF(faceDirection);
+
+                    GridSystem.current.setValue(nextX, nextZ, 1, this, width, height);
                 }
                 else
                 {
                     MoveToNextPosition();
                     GridSystem.current.getXZ(transform.position, out this.x, out this.z);
                 }
-
-                //// update target location and rotation
-                //if (CountDown > 0) CountDown -= Time.deltaTime;
-                //// get next x next z
-
-                ////if (!targetPosition.Equals(transform.position) && GridSystem.current.checkOccupationExcept(x, z, this))
-                //// move until equals next x next z
-                //if (!targetPosition.Equals(transform.position))
-                //{
-
-                //    updateTargetLocationRotation();
-
-                //    // move to next x next z
-                //    MoveToTargetPosition();
-
-                    
-
-
-                //    int nx, nz;
-                //    GridSystem.current.getXZ(transform.position, out nx, out nz);
-                //    if (nx != this.x || nz != this.z)
-                //    {
-                //        moveDirection = getDir();
-                //        targetRotation = getDirRotation(moveDirection);
-                //    }
-                //    this.x = nx;
-                //    this.z = nz;
-
-                //}
             })
             .OnExit(() => { Debug.Log("Run exit"); })
         );
@@ -338,6 +311,66 @@ public abstract class Unit : MonoBehaviour, IUnit
         nextPosition = GridSystem.current.getWorldPosition(nextX, nextZ);
     }
 
+    private void updateNextPositonWithPF(IUnit.dir dir)
+    {
+        switch (dir)
+        {
+            case IUnit.dir.forward:
+                if (GridSystem.current.checkOccupationExcept(x, z + 1, width, height, this))
+                {
+                    nextX = x;
+                    nextZ = z + 1;
+                }
+                else
+                {
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x, z + 1), width, height);
+                    nextX = newXZ.x;
+                    nextZ = newXZ.y;
+                }
+                break;
+            case IUnit.dir.right:
+                if (GridSystem.current.checkOccupationExcept(x + 1, z, width, height, this))
+                {
+                    nextX = x + 1;
+                    nextZ = z;
+                }
+                else
+                {
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x + 1, z), width, height);
+                    nextX = newXZ.x;
+                    nextZ = newXZ.y;
+                }
+                break;
+            case IUnit.dir.backward:
+                if (GridSystem.current.checkOccupationExcept(x, z - 1, width, height, this))
+                {
+                    nextX = x;
+                    nextZ = z - 1;
+                }
+                else
+                {
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x, z - 1), width, height);
+                    nextX = newXZ.x;
+                    nextZ = newXZ.y;
+                }
+                break;
+            case IUnit.dir.left:
+                if (GridSystem.current.checkOccupationExcept(x - 1, z, width, height, this))
+                {
+                    nextX = x - 1;
+                    nextZ = z;
+                }
+                else
+                {
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x - 1, z), width, height);
+                    nextX = newXZ.x;
+                    nextZ = newXZ.y;
+                }
+                break;
+        }
+        nextPosition = GridSystem.current.getWorldPosition(nextX, nextZ);
+    }
+
     // Update transform.position until it equals to NextPosition. It will keep remove Value and set value to update GridVal.
     private void MoveToNextPosition()
     {
@@ -392,7 +425,6 @@ public abstract class Unit : MonoBehaviour, IUnit
     {
         //Debug.Log("transform.position" + transform.position + "targetPosition" + targetPosition + state.Name+"nextPosition"+nextPosition);
         state.onUpdate();
-        
     }
 
     // Convert direction to Rotation.
@@ -509,5 +541,24 @@ public abstract class Unit : MonoBehaviour, IUnit
                 return IUnit.dir.backward;
             }
         }
+    }
+
+    private IUnit.dir GetDirWithPF(List<GridData>path)
+    {
+        // If the unit already reached the targetPosition.
+        if (path.Count == 1) return IUnit.dir.forward;
+
+        var diff = path[path.Count - 2].Position - path[path.Count-1].Position;
+        Debug.Log($"path[path.Count - 2]{path[path.Count - 2].Position},path[path.Count-1]:{path[path.Count - 1].Position}");
+        if (diff == new Vector2Int(0, 1)) return IUnit.dir.forward;
+        else if (diff == new Vector2Int(0, -1)) return IUnit.dir.backward;
+        else if (diff == new Vector2Int(1, 0)) return IUnit.dir.right;
+        else if (diff == new Vector2Int(-1, 0)) return IUnit.dir.left;
+        else
+        {
+            Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + $"diff vector does not have an expected value. diff:{diff}");
+            return IUnit.dir.forward;
+        }
+
     }
 }

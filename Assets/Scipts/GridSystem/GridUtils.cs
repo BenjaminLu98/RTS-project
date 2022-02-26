@@ -76,4 +76,107 @@ public class GridUtils
         }
     }
 
+    /// <summary>
+    /// get the 4 neibour nodes at the top, bottom, left, right of the node.
+    /// </summary>
+    /// <param name="node"></param>
+    /// <returns></returns>
+    public static List<GridData> GetNeighbourList(GridData node)
+    {
+        List<GridData> list = new List<GridData>(); 
+        var position = node.Position;
+        var x = position.x;
+        var y = position.y;
+        var width = GridSystem.width;
+        var height = GridSystem.height;
+        // left side
+        if (x > 0)
+        {
+            list.Add(GridSystem.current.getGridData(x - 1, y));
+            //if (y > 0) list.Add(GridSystem.current.getGridData(x - 1, y - 1));
+            //if (y < width - 1) list.Add(GridSystem.current.getGridData(x - 1, y + 1));
+        }
+        // right side
+        if (x < width - 1)
+        {
+            list.Add(GridSystem.current.getGridData(x + 1, y));
+            //if (y > 0) list.Add(GridSystem.current.getGridData(x + 1, y - 1));
+            //if (y < width - 1) list.Add(GridSystem.current.getGridData(x + 1, y + 1));
+        }
+        //bottom
+        if (y > 0) list.Add(GridSystem.current.getGridData(x, y - 1));
+        //top
+        if (y < width - 1) list.Add(GridSystem.current.getGridData(x, y + 1));
+
+        return list;
+    }
+
+    public static List<GridData> GetOccupied()
+    {
+        var list = new List<GridData>();
+        for (int i = 0; i < GridSystem.width; i++)
+        {
+            for (int j = 0; j < GridSystem.height; j++)
+            {
+                if (GridSystem.current.getGridData(i, j).IsOccupied)
+                {
+                    list.Add(GridSystem.current.getGridData(i, j));
+                }
+            }
+        }
+        return list;
+    }
+
+    public static List<GridData> GetEmptyNeighbourList(GridData node)
+    {
+        List<GridData> list = new List<GridData>();
+        var position = node.Position;
+        var x = position.x;
+        var y = position.y;
+        var width = GridSystem.width;
+        var height = GridSystem.height;
+        // left side
+        if (x > 0)
+        {
+            var neibour = GridSystem.current.getGridData(x - 1, y);
+            if (!neibour.IsOccupied){
+                list.Add(neibour);
+            }
+            
+            //if (y > 0) list.Add(GridSystem.current.getGridData(x - 1, y - 1));
+            //if (y < width - 1) list.Add(GridSystem.current.getGridData(x - 1, y + 1));
+        }
+        // right side
+        if (x < width - 1)
+        {
+            var neibour = GridSystem.current.getGridData(x + 1, y);
+            if (!neibour.IsOccupied)
+            {
+                list.Add(neibour);
+            }
+            //if (y > 0) list.Add(GridSystem.current.getGridData(x + 1, y - 1));
+            //if (y < width - 1) list.Add(GridSystem.current.getGridData(x + 1, y + 1));
+        }
+        //bottom
+        if (y > 0)
+        {
+            var neibour = GridSystem.current.getGridData(x , y - 1);
+            if (!neibour.IsOccupied)
+            {
+                list.Add(neibour);
+            }
+        }
+        //top
+        if (y < width - 1)
+        {
+            var neibour = GridSystem.current.getGridData(x , y + 1);
+            if (!neibour.IsOccupied)
+            {
+                list.Add(neibour);
+            }
+        }
+
+        return list;
+    }
+
 }

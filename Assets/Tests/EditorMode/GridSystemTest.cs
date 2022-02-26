@@ -106,5 +106,32 @@ public class GridSystemTest
         Assert.IsTrue(result3);
     }
 
+    [Test]
+    public void PathfindTest()
+    {
+        PathFinding pf = new PathFinding();
+        var path = pf.FindPath(7, 4, 6, 6);
+        foreach(var node in path)
+        {
+            Debug.Log(node.Position);
+        }
+          
+    }
+
+    [Test]
+    public void PathfindTestWithOccupation()
+    {
+        PathFinding pf = new PathFinding();
+        var path1 = pf.FindPath(1, 1, 1, 4);
+        GridSystem.current.setValue(1, 2, 0 , null);
+        var path2 = pf.FindPath(1, 1, 1, 4);
+        Assert.AreNotEqual(path1, path2);
+        foreach (var node in path2)
+        {
+            Debug.Log(node.Position);
+        }
+
+    }
+
 
 }

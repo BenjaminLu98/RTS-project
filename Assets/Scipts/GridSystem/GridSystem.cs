@@ -28,7 +28,7 @@ public class GridSystem
         {
             for(int j = 0; j < height; j++)
             {
-                gridDataArray[i, j] = new GridData(0, new Vector2Int(i, j), 1, CubeType.Grass);
+                gridDataArray[i, j] = new GridData(0, new Vector2Int(i, j), 0, CubeType.Grass);
             }
         }
     }
@@ -105,6 +105,7 @@ public class GridSystem
         }
     }
     
+    // TODO: move to util
     //Draw the grid
     public void drawDebugLine()
     {
@@ -219,7 +220,9 @@ public class GridSystem
             {
                 for(int j = 0; j < height; j++)
                 {
-                    gridDataArray[x + i, z + j] = new GridData();
+                    gridDataArray[x + i, z + j].Num = 0;
+                    gridDataArray[x + i, z + j].IsOccupied = false;
+                    gridDataArray[x + i, z + j].PlaceableObj = null;
                 }
             }
         }
@@ -372,6 +375,7 @@ public class GridSystem
 
     public bool checkOccupationExcept(int x, int z, int width, int height, IPlaceableObj obj)
     {
+
         if (!checkWidthHeight(x, z, width, height)) return false;
         for (int i = 0; i < width; i++)
         {
