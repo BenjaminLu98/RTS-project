@@ -228,7 +228,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Unit
+  m_Name: CrossBow
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: isRunning
@@ -436,7 +436,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 706fb4b85bce6cf47af367a4747c9653, type: 3}
+  m_Motion: {fileID: 7400000, guid: ef04ee36c64bc154bae0eb8fab4bab44, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -482,6 +482,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0277b97ecea6ec64fa10326d85fc4092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  unit: {fileID: 0}
 --- !u!1101 &6296375893290898965
 AnimatorStateTransition:
   m_ObjectHideFlags: 1

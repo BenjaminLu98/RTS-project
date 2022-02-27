@@ -107,10 +107,11 @@ public class Cube
     GameObject instance;
     public Cube(CubeType cubeType, Vector3 worldPosition)
     {
-        this.cubeType = cubeType;
+        var parent = GameObject.Find("Cubes");
+        this.cubeType = cubeType; 
         prefab = Resources.Load<GameObject>("Map/" + cubeType.ToString());
         if (!prefab) Debug.LogError("Fail to load resource:" + cubeType.ToString());
-        instance = GameObject.Instantiate(prefab, worldPosition, Quaternion.identity);
+        instance = GameObject.Instantiate(prefab, worldPosition, Quaternion.identity, parent.transform);
     }
 
 

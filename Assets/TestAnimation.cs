@@ -4,17 +4,10 @@ using UnityEngine;
 
 public class TestAnimation : MonoBehaviour
 {
-    Animator animator;
-    // Start is called before the first frame update
-    void Start()
+    public Unit unit;
+    
+    public void attack()
     {
-        animator=GetComponent<Animator>();
-        animator.SetBool("isRunning", true);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        unit.DealDamage(IUnit.DamageType.Physical);
     }
 }

@@ -4,7 +4,8 @@ using UnityEngine;
 
 public abstract class Unit : MonoBehaviour, IUnit
 {
-    protected float hp;
+    public Unit obj;
+
     protected float rotateSpeed = 180f;
     protected bool isMoving = false;
     protected bool isRotating = false;
@@ -21,13 +22,14 @@ public abstract class Unit : MonoBehaviour, IUnit
     protected Transform modelTransform;
     protected StateManager state;
     protected TargetSelector ts = new TargetSelector();
-    protected Action onDeath;
+    protected event Action onDeath;
     protected PathFinding pf;
-    private float CountDown;
+    private float countDown = 0;
     private IUnit.dir faceDirection;
     private float maxSpeed = 3f;
-    
 
+    public CombatData defaultCombatData;
+    private CombatData combatData;
 
     protected void Start()
     {
@@ -38,14 +40,12 @@ public abstract class Unit : MonoBehaviour, IUnit
         faceRotation = modelTransform.rotation;
         pf = new PathFinding();
         InitializeStateManager();
+        combatData = Instantiate<CombatData>(defaultCombatData);
+
+        onDeath += (() => { Debug.LogWarning("I am dead!!"); });
+
     }
-    //Note that you need to convert float hp to integer.
-    public int HP {
-        get
-        {
-            return Mathf.RoundToInt(hp);
-        }            
-    }
+
     public Vector2Int Position
     {
         get
@@ -127,13 +127,158 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
     }
 
-    public float PhysicalAttack { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float MagicAttack { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float PhysicalDefence { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float MagicDefence { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float Mana { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float AttackInterval { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public float AttackRange { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float PhysicalAttack {
+        get
+        {
+            if(combatData)return combatData.physicalAttack;
+            else
+            {
+                Debug.LogError("combatData is null");
+                return 0;
+            }
+        }
+        set
+        {
+            if (combatData)
+                combatData.physicalAttack = value;
+            else
+                Debug.LogError("combatData is null");
+        }
+    }
+    //Note that you need to convert float hp to integer.
+    public float HP
+    {
+        get
+        {
+            if (combatData) return combatData.hp;
+            else
+            {
+                Debug.LogError("combatData is null");
+                return 0;
+            }
+        }
+        set
+        {
+            if (combatData)
+                combatData.hp = value;
+            else
+                Debug.LogError("combatData is null");
+        }
+    }
+    public float MagicAttack
+    {
+        get
+        {
+            if (combatData) return combatData.magicAttack;
+            else
+            {
+                Debug.LogError("combatData is null");
+                return 0;
+            }
+        }
+        set
+        {
+            if (combatData)
+                combatData.magicAttack = value;
+            else
+                Debug.LogError("combatData is null");
+        }
+    }
+    public float PhysicalDefence
+    {
+        get
+        {
+            if (combatData) return combatData.physicalDefence;
+            else
+            {
+                Debug.LogError("combatData is null");
+                return 0;
+            }
+        }
+        set
+        {
+            if (combatData)
+                combatData.physicalDefence = value;
+            else
+                Debug.LogError("combatData is null");
+        }
+    }
+    public float MagicDefence
+    {
+        get
+        {
+            if (combatData) return combatData.magicDefence;
+            else
+            {
+                Debug.LogError("combatData is null");
+                return 0;
+            }
+        }
+        set
+        {
+            if (combatData)
+                combatData.magicDefence = value;
+            else
+                Debug.LogError("combatData is null");
+        }
+    }
+    public float Mana
+    {
+        get
+        {
+            if (combatData) return combatData.mana;
+            else
+            {
+                Debug.LogError("combatData is null");
+                return 0;
+            }
+        }
+        set
+        {
+            if (combatData)
+                combatData.mana = value;
+            else
+                Debug.LogError("combatData is null");
+        }
+    }
+    public float AttackInterval
+    {
+        get
+        {
+            if (combatData) return combatData.attackInterval;
+            else
+            {
+                Debug.LogError("combatData is null");
+                return 0;
+            }
+        }
+        set
+        {
+            if (combatData)
+                combatData.attackInterval = value;
+            else
+                Debug.LogError("combatData is null");
+        }
+    }
+    public float AttackRange
+    {
+        get
+        {
+            if (combatData) return combatData.attackRange;
+            else
+            {
+                Debug.LogError("combatData is null");
+                return 0;
+            }
+        }
+        set
+        {
+            if (combatData)
+                combatData.attackRange = value;
+            else
+                Debug.LogError("combatData is null");
+        }
+    }
 
     public float MaxSpeed
     {
@@ -185,12 +330,12 @@ public abstract class Unit : MonoBehaviour, IUnit
     {
         state = new StateManager();
         state.addStatus("Idle", new State()
-            .OnStart(() => { CountDown = 4.0f; animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); Debug.Log("Idle onStart"); })
-            .OnStay(() => { if (CountDown > 0) CountDown -= Time.deltaTime; })
+            .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); Debug.Log("Idle onStart"); })
+            .OnStay(() => { Debug.Log(HP); })
             .OnExit(() => Debug.Log("exit idle"))
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Run", () => !targetPosition.Equals(transform.position))
-            .addCondition("Attack", () => ts.getTarget() != null && CountDown <= 0)
+            .addCondition("Attack", () => ts.getTarget(obj) != null && countDown <= 0)
             );
 
         state.addStatus("Rotate", new State()
@@ -207,8 +352,8 @@ public abstract class Unit : MonoBehaviour, IUnit
         state.addStatus("Run", new State()
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Idle", () => targetPosition.Equals(transform.position))
-            .addCondition("Attack", () => ts.getTarget() != null && CountDown <= 0)
-            .OnStart(() => { CountDown = 2.0f; animator.SetBool("isRunning", true); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); ; Debug.Log("run onStart"); })
+            .addCondition("Attack", () => ts.getTarget(obj) != null && countDown <= 0)
+            .OnStart(() => {  animator.SetBool("isRunning", true); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); ; Debug.Log("run onStart"); })
             .OnStay(() =>
             {
                 if (nextPosition.Equals(transform.position))
@@ -236,18 +381,28 @@ public abstract class Unit : MonoBehaviour, IUnit
             .OnExit(() => { Debug.Log("Run exit"); })
         );
 
+        // TODO: Substitute it so that it is the attack animation duration.
+        float maxTime = 1.0f;
+        float attackDuration = maxTime;
         state.addStatus("Attack", new State()
             // TODO: add animation stop
-            .addCondition("Idle", () => targetPosition.Equals(transform.position))
-            .addCondition("Run", () => !targetPosition.Equals(transform.position))
-            .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
+            .addCondition("Idle", () => targetPosition.Equals(transform.position)&&attackDuration<0)
+            .addCondition("Run", () => !targetPosition.Equals(transform.position) && attackDuration < 0)
+            .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation) && attackDuration < 0)
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", true); animator.SetBool("isRotating", false); })
             .OnStay(() =>
             {
-
+                Debug.Log("Attack stay"+ AttackInterval);
+                attackDuration -= Time.deltaTime;
             })
-            .OnExit(() => animator.SetBool("isAttacking", false))
-            );
+            .OnExit(() =>
+            {
+                animator.SetBool("isAttacking", false);
+                countDown = AttackInterval;
+                attackDuration = maxTime;
+            }
+
+            ));
         state.Name = "Idle";
     }
 
@@ -389,41 +544,43 @@ public abstract class Unit : MonoBehaviour, IUnit
         GridSystem.current.setValue(transform.position, 10, this, width, height);
     }
 
-    public float attack(float expectedDamage, IUnit.DamageType type)
+    // Animation Callback function.
+    public float DealDamage( IUnit.DamageType type)
     {
         //Find the target unit
-        var target = ts.getTarget();
+        var target = ts.getTarget(obj);
         //deal damage
-        target.recieveDamage(expectedDamage, type);
+        target.receiveDamage(type, combatData);
         //return actual damage
         return 0;
     }
 
-    public bool recieveDamage(float expectedDamage, IUnit.DamageType type)
+    public bool receiveDamage(IUnit.DamageType type, CombatData from)
     {
         float damage = 0f;
         //calculate actual damage
         switch (type)
         {
             case IUnit.DamageType.Magic:
-                damage = (1 - MagicDefence) * expectedDamage;
+                damage = (1 - MagicDefence) * from.magicAttack;
                 break;
             case IUnit.DamageType.Physical:
-                damage =Mathf.Clamp(expectedDamage - PhysicalDefence,0,10000f);
+                damage =Mathf.Clamp(from.physicalAttack - PhysicalDefence,0,10000f);
                 break;
         }
         //apply damage
-        hp -= Mathf.Clamp(damage,0.0f,100.0f);
+        HP = Mathf.Clamp(HP - damage,0.0f,100.0f);
 
         //if the damage is greater than hp, then the unit will die.
-        if (hp.Equals(0.0f)) onDeath();
+        if (HP.Equals(0.0f)) onDeath.Invoke();
 
         return true;
     }
 
     private void Update()
     {
-        //Debug.Log("transform.position" + transform.position + "targetPosition" + targetPosition + state.Name+"nextPosition"+nextPosition);
+        countDown -= Time.deltaTime;
+
         state.onUpdate();
     }
 

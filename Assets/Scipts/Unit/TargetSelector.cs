@@ -4,16 +4,22 @@ using UnityEngine;
 
 public class TargetSelector
 {
-    public List<IUnit> getTargets()
+    public List<Unit> getTargets()
     {
         //throw new NotImplementedException();
         return null;
     }
 
-    public IUnit getTarget()
+    public Unit getTarget()
     {
         //throw new NotImplementedException();
         return null;
     }
-    
+
+    public Unit getTarget(Unit unit)
+    {
+        //throw new NotImplementedException();
+        return unit;
+    }
+
 }

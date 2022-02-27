@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4172c16103bc8a04bb6ab73916217e7d, type: 3}
+  m_Name: DefaultCrossBow
+  m_EditorClassIdentifier: 
+  hp: 100
+  physicalAttack: 10
+  magicAttack: 0
+  physicalDefence: 3
+  magicDefence: 3
+  mana: 0
+  attackInterval: 2
+  attackRange: 10

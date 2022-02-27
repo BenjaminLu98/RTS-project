@@ -14,10 +14,6 @@ public interface IUnit :IPlaceableObj
         Physical,
         Magic
     };
-    int HP
-    {
-        get;
-    }
 
     public float PhysicalAttack
     {
@@ -83,7 +79,7 @@ public interface IUnit :IPlaceableObj
     /// <summary>
     /// Attack the gameObject at position(x,z). If there is no unit in the target posiiton, do nothing.
     /// </summary>
-    public float attack(float expectedDamage, IUnit.DamageType type);
+    public float DealDamage(DamageType type);
 
     /// <summary>
     /// 
@@ -91,6 +87,6 @@ public interface IUnit :IPlaceableObj
     /// <param name="expectedDamage"></param>
     /// <param name="type"></param>
     /// <returns></returns>
-    public bool recieveDamage(float expectedDamage, DamageType type);
+    public bool receiveDamage(IUnit.DamageType type, CombatData from);
 
 }
