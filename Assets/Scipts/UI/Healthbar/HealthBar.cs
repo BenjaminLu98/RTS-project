@@ -7,24 +7,23 @@ public class HealthBar : MonoBehaviour
 {
     public GameObject healthBarPrefab;
     public bool alwaysShow = true;
+    public float showTime = 1.0f;
     public Transform anchor;
 
     GameObject healthBar;
 
-    CombatData currentState;
-
-    Transform cam;
     
     Image GreenSlider;
 
     Canvas targetCanvas;
 
+    float timeLeft;
 
     private void Awake()
     {
         Unit unit = GetComponent<Unit>();
         unit.onDamaged += Unit_onDamaged;
-
+        timeLeft = showTime;
     }
 
     
@@ -33,6 +32,7 @@ public class HealthBar : MonoBehaviour
     {
         float percentage = Mathf.Clamp(currentHP/defaultHP, 0, 1);
         healthBar.SetActive(true);
+        timeLeft = showTime;
         GreenSlider.fillAmount = percentage;
     }
 
@@ -65,6 +65,17 @@ public class HealthBar : MonoBehaviour
         if (healthBar)
         {
             healthBar.transform.position = anchor.position;
+
+            if (!alwaysShow) {
+                if (timeLeft < 0)
+                {
+                    healthBar.SetActive(false);
+                }
+                else
+                {
+                    timeLeft -= Time.deltaTime;
+                }
+            }
         }
     }
 
