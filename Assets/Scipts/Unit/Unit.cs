@@ -6,6 +6,9 @@ public abstract class Unit : MonoBehaviour, IUnit
 {
     public Unit obj;
 
+    public event Action onDeath;
+    public event Action<float, float> onDamaged;
+
     protected float rotateSpeed = 180f;
     protected bool isMoving = false;
     protected bool isRotating = false;
@@ -22,14 +25,14 @@ public abstract class Unit : MonoBehaviour, IUnit
     protected Transform modelTransform;
     protected StateManager state;
     protected TargetSelector ts = new TargetSelector();
-    protected event Action onDeath;
+
     protected PathFinding pf;
     private float countDown = 0;
     private IUnit.dir faceDirection;
     private float maxSpeed = 3f;
 
     public CombatData defaultCombatData;
-    private CombatData combatData;
+    public CombatData combatData;
 
     protected void Start()
     {
@@ -570,6 +573,7 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
         //apply damage
         HP = Mathf.Clamp(HP - damage,0.0f,100.0f);
+        onDamaged.Invoke(defaultCombatData.hp,HP);
 
         //if the damage is greater than hp, then the unit will die.
         if (HP.Equals(0.0f)) onDeath.Invoke();
