@@ -120,7 +120,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healthBarPrefab: {fileID: 4568647113645102023, guid: dabb9e1d561c6ad48b4230ce70d22044,
     type: 3}
-  alwaysShow: 1
+  alwaysShow: 0
   anchor: {fileID: 1587403638438131652}
 --- !u!1001 &267386616529474503
 PrefabInstance:
