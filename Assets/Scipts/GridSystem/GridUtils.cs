@@ -179,4 +179,9 @@ public class GridUtils
         return list;
     }
 
+    public static float calculateDistance(int x1, int z1, int x2, int z2)
+    {
+       return Vector2Int.Distance(new Vector2Int(x1, z1), new Vector2Int(x2, z2))*GridSystem.sideLength;
+    }
+
 }

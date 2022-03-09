@@ -2,24 +2,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TargetSelector
+public abstract class TargetSelector
 {
-    public List<Unit> getTargets()
-    {
-        //throw new NotImplementedException();
-        return null;
-    }
+    protected int teamNo;
 
-    public Unit getTarget()
-    {
-        //throw new NotImplementedException();
-        return null;
-    }
+    abstract public List<Unit> getTargets(int x, int z, IUnit.dir dir);
 
-    public Unit getTarget(Unit unit)
-    {
-        //throw new NotImplementedException();
-        return unit;
-    }
+    abstract public Unit getTarget(int x, int z, IUnit.dir dir);
+
+    abstract public Unit getTarget(Unit unit );
 
 }

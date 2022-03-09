@@ -64,8 +64,7 @@ public class GridSystemTest
     [Test]
     public void setHeightShouldRejectNegativeHeight()
     {
-        GridSystem.current.setHeight(15, 20, -1);
-        Assert.AreEqual(GridSystem.current.getHeight(15, 20), 1);
+        Assert.IsFalse(GridSystem.current.setHeight(15, 20, -1));
     }
 
     [Test]
@@ -130,7 +129,13 @@ public class GridSystemTest
         {
             Debug.Log(node.Position);
         }
+    }
 
+    [Test]
+    public void UtilCalculateDistanceShouldReturnCorrectDistance()
+    {
+        Assert.IsTrue(float.Equals(GridUtils.calculateDistance(3, 3, 5, 5),2f*Mathf.Pow(2f,0.5f)*GridSystem.sideLength));
+        
     }
 
 

@@ -4,13 +4,20 @@ using UnityEngine;
 
 public abstract class Unit : MonoBehaviour, IUnit
 {
+    public static List<Unit> unitList;
+
+    static Unit()
+    {
+        unitList = new List<Unit>();
+    }
+
     public Unit obj;
 
     public event Action onDeath;
     public event Action<float, float> onDamaged;
 
     protected float rotateSpeed = 180f;
-    protected bool isMoving = false;
+    //protected bool isMoving = false;
     protected bool isRotating = false;
     protected int x;
     protected int z;
@@ -24,17 +31,27 @@ public abstract class Unit : MonoBehaviour, IUnit
     protected Quaternion faceRotation;
     protected Transform modelTransform;
     protected StateManager state;
-    protected TargetSelector ts = new TargetSelector();
+    protected TargetSelector ts;
 
     protected PathFinding pf;
     private float countDown = 0;
     private IUnit.dir faceDirection;
     private float maxSpeed = 3f;
     private bool isDead = false;
+    private int teamNo;
 
     public CombatData defaultCombatData;
-    public CombatData combatData;
+    public CombatData currentCombatStatus;
 
+    protected void Awake()
+    {
+        unitList.Add(this);
+    }
+
+    private void OnDestroy()
+    {
+        unitList.Remove(this);
+    }
     protected void Start()
     {
         animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false);
@@ -44,13 +61,12 @@ public abstract class Unit : MonoBehaviour, IUnit
         faceRotation = modelTransform.rotation;
         pf = new PathFinding();
         InitializeStateManager();
-        combatData = Instantiate<CombatData>(defaultCombatData);
+        currentCombatStatus = Instantiate<CombatData>(defaultCombatData);
 
         onDeath += (() => { 
             Debug.LogWarning("I am dead!!");
             isDead = true;
         });
-
     }
 
     public Vector2Int Position
@@ -137,7 +153,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     public float PhysicalAttack {
         get
         {
-            if(combatData)return combatData.physicalAttack;
+            if(currentCombatStatus)return currentCombatStatus.physicalAttack;
             else
             {
                 Debug.LogError("combatData is null");
@@ -146,8 +162,8 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
         set
         {
-            if (combatData)
-                combatData.physicalAttack = value;
+            if (currentCombatStatus)
+                currentCombatStatus.physicalAttack = value;
             else
                 Debug.LogError("combatData is null");
         }
@@ -157,7 +173,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     {
         get
         {
-            if (combatData) return combatData.hp;
+            if (currentCombatStatus) return currentCombatStatus.hp;
             else
             {
                 Debug.LogError("combatData is null");
@@ -166,8 +182,8 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
         set
         {
-            if (combatData)
-                combatData.hp = value;
+            if (currentCombatStatus)
+                currentCombatStatus.hp = value;
             else
                 Debug.LogError("combatData is null");
         }
@@ -176,7 +192,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     {
         get
         {
-            if (combatData) return combatData.magicAttack;
+            if (currentCombatStatus) return currentCombatStatus.magicAttack;
             else
             {
                 Debug.LogError("combatData is null");
@@ -185,8 +201,8 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
         set
         {
-            if (combatData)
-                combatData.magicAttack = value;
+            if (currentCombatStatus)
+                currentCombatStatus.magicAttack = value;
             else
                 Debug.LogError("combatData is null");
         }
@@ -195,7 +211,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     {
         get
         {
-            if (combatData) return combatData.physicalDefence;
+            if (currentCombatStatus) return currentCombatStatus.physicalDefence;
             else
             {
                 Debug.LogError("combatData is null");
@@ -204,8 +220,8 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
         set
         {
-            if (combatData)
-                combatData.physicalDefence = value;
+            if (currentCombatStatus)
+                currentCombatStatus.physicalDefence = value;
             else
                 Debug.LogError("combatData is null");
         }
@@ -214,7 +230,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     {
         get
         {
-            if (combatData) return combatData.magicDefence;
+            if (currentCombatStatus) return currentCombatStatus.magicDefence;
             else
             {
                 Debug.LogError("combatData is null");
@@ -223,8 +239,8 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
         set
         {
-            if (combatData)
-                combatData.magicDefence = value;
+            if (currentCombatStatus)
+                currentCombatStatus.magicDefence = value;
             else
                 Debug.LogError("combatData is null");
         }
@@ -233,7 +249,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     {
         get
         {
-            if (combatData) return combatData.mana;
+            if (currentCombatStatus) return currentCombatStatus.mana;
             else
             {
                 Debug.LogError("combatData is null");
@@ -242,8 +258,8 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
         set
         {
-            if (combatData)
-                combatData.mana = value;
+            if (currentCombatStatus)
+                currentCombatStatus.mana = value;
             else
                 Debug.LogError("combatData is null");
         }
@@ -252,7 +268,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     {
         get
         {
-            if (combatData) return combatData.attackInterval;
+            if (currentCombatStatus) return currentCombatStatus.attackInterval;
             else
             {
                 Debug.LogError("combatData is null");
@@ -261,8 +277,8 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
         set
         {
-            if (combatData)
-                combatData.attackInterval = value;
+            if (currentCombatStatus)
+                currentCombatStatus.attackInterval = value;
             else
                 Debug.LogError("combatData is null");
         }
@@ -271,7 +287,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     {
         get
         {
-            if (combatData) return combatData.attackRange;
+            if (currentCombatStatus) return currentCombatStatus.attackRange;
             else
             {
                 Debug.LogError("combatData is null");
@@ -280,8 +296,8 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
         set
         {
-            if (combatData)
-                combatData.attackRange = value;
+            if (currentCombatStatus)
+                currentCombatStatus.attackRange = value;
             else
                 Debug.LogError("combatData is null");
         }
@@ -294,6 +310,8 @@ public abstract class Unit : MonoBehaviour, IUnit
             return maxSpeed;
         }
     }
+
+    public int TeamNo { get => teamNo; set => teamNo = value; }
 
     public bool placeAt(int x, int z)
     {
@@ -343,7 +361,7 @@ public abstract class Unit : MonoBehaviour, IUnit
             .addCondition("Die",()=> isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Run", () => !targetPosition.Equals(transform.position))
-            .addCondition("Attack", () => ts.getTarget(obj) != null && countDown <= 0)
+            .addCondition("Attack", () => ts.getTarget(x,z,faceDirection) != null && countDown <= 0)
             );
 
         state.addStatus("Rotate", new State()
@@ -362,7 +380,7 @@ public abstract class Unit : MonoBehaviour, IUnit
             .addCondition("Die", () => isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Idle", () => targetPosition.Equals(transform.position))
-            .addCondition("Attack", () => ts.getTarget(obj) != null && countDown <= 0)
+            .addCondition("Attack", () => ts.getTarget(x, z, faceDirection) != null && countDown <= 0)
             .OnStart(() => {  animator.SetBool("isRunning", true); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); ; Debug.Log("run onStart"); })
             .OnStay(() =>
             {
@@ -376,10 +394,10 @@ public abstract class Unit : MonoBehaviour, IUnit
                     var path = pf.FindPath(x, z, targetX, targetY);
 
                     // Update moveDirection and targetRotation
-                    faceDirection = GetDirWithPF(path);
-                    faceRotation = getDirRotation(faceDirection);
+                    faceDirection = UnitUtil.GetDirWithPF(path);
+                    faceRotation = UnitUtil.getDirRotation(faceDirection);
                     updateNextPositonWithPF(faceDirection);
-
+                    faceDirection = UnitUtil.getDir(new Vector2Int(x, z), new Vector2Int(nextX, nextZ));
                     GridSystem.current.setValue(nextX, nextZ, 1, this, width, height);
                 }
                 else
@@ -567,12 +585,12 @@ public abstract class Unit : MonoBehaviour, IUnit
         //Make sure the unit will finally arrive exactly at the next position.
         if ((nextPosition - transform.position).magnitude > Time.deltaTime * trueSpeed)
         {
-            transform.position += Time.deltaTime * trueSpeed * getDirVector(faceDirection);
+            transform.position += Time.deltaTime * trueSpeed * UnitUtil.getDirVector(faceDirection);
         }
         else
         {
             transform.position = nextPosition;
-            isMoving = false;
+            //isMoving = false;
         }
         GridSystem.current.setValue(transform.position, 10, this, width, height);
     }
@@ -581,9 +599,9 @@ public abstract class Unit : MonoBehaviour, IUnit
     public float DealDamage( IUnit.DamageType type)
     {
         //Find the target unit
-        var target = ts.getTarget(obj);
+        var target = ts.getTarget(x, z, faceDirection);
         //deal damage
-        target.receiveDamage(type, combatData);
+        target.receiveDamage(type, currentCombatStatus);
         //return actual damage
         return 0;
     }
@@ -618,86 +636,9 @@ public abstract class Unit : MonoBehaviour, IUnit
         state.onUpdate();
     }
 
-    // Convert direction to Rotation.
-    private Quaternion getDirRotation(IUnit.dir dir)
-    {
-        switch (dir)
-        {
-            case IUnit.dir.forward:
-                return Quaternion.LookRotation(Vector3.forward);
-            case IUnit.dir.right:
-                return Quaternion.LookRotation(Vector3.right);
-            case IUnit.dir.backward:
-                return Quaternion.LookRotation(Vector3.back);
-            case IUnit.dir.left:
-                return Quaternion.LookRotation(Vector3.left);
-        }
-        Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + ": no matching direction");
-        return Quaternion.LookRotation(Vector3.forward);
-    }
-
-    // Get the normalized direction vector from the enum direction.
-    private Vector3 getDirVector(IUnit.dir dir)
-    {
-        switch (dir)
-        {
-            case IUnit.dir.forward:
-                return Vector3.forward;
-            case IUnit.dir.right:
-                return Vector3.right;
-            case IUnit.dir.backward:
-                return Vector3.back;
-            case IUnit.dir.left:
-                return Vector3.left;
-        }
-        Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + ": no matching direction");
-        return Vector3.forward;
-    }
-
-    // Convert a vector(from->to ) to the four direction.
-    IUnit.dir getDir(Vector2Int from, Vector2Int to) 
-    {
-        var fromPosition = GridSystem.current.getWorldPosition(from.x, from.y);
-        var toPosition = GridSystem.current.getWorldPosition(to.x, to.y);
-
-        float zDeg = Vector3.Angle(Vector3.forward, toPosition - fromPosition);
-        float xDeg = Vector3.Angle(Vector3.right, toPosition - fromPosition);
-
-        if (xDeg < 90f)
-        {
-            if (zDeg < 45f)
-            {
-                return IUnit.dir.forward;
-            }
-            else if (zDeg < 135f)
-            {
-                return IUnit.dir.right;
-            }
-            else
-            {
-                return IUnit.dir.backward;
-            }
-        }
-        else
-        {
-            if (zDeg < 45f)
-            {
-                return IUnit.dir.forward;
-            }
-            else if (zDeg < 135f)
-            {
-                return IUnit.dir.left;
-            }
-            else
-            {
-                return IUnit.dir.backward;
-            }
-        }
-    }
-
     // Convert the real target direction to four target direction.
     // TODO: substitute it with Path finding algorithm.
-    IUnit.dir getDir()
+     IUnit.dir getDir()
     {
         float zDeg = Vector3.Angle(Vector3.forward, targetPosition - transform.position);
         float xDeg = Vector3.Angle(Vector3.right, targetPosition - transform.position);
@@ -708,7 +649,7 @@ public abstract class Unit : MonoBehaviour, IUnit
             {
                 return IUnit.dir.forward;
             }
-            else if(zDeg<135f)
+            else if (zDeg < 135f)
             {
                 return IUnit.dir.right;
             }
@@ -732,25 +673,6 @@ public abstract class Unit : MonoBehaviour, IUnit
                 return IUnit.dir.backward;
             }
         }
-    }
-
-    private IUnit.dir GetDirWithPF(List<GridData>path)
-    {
-        // If the unit already reached the targetPosition.
-        if (path.Count == 1) return IUnit.dir.forward;
-
-        var diff = path[path.Count - 2].Position - path[path.Count-1].Position;
-        Debug.Log($"path[path.Count - 2]{path[path.Count - 2].Position},path[path.Count-1]:{path[path.Count - 1].Position}");
-        if (diff == new Vector2Int(0, 1)) return IUnit.dir.forward;
-        else if (diff == new Vector2Int(0, -1)) return IUnit.dir.backward;
-        else if (diff == new Vector2Int(1, 0)) return IUnit.dir.right;
-        else if (diff == new Vector2Int(-1, 0)) return IUnit.dir.left;
-        else
-        {
-            Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + $"diff vector does not have an expected value. diff:{diff}");
-            return IUnit.dir.forward;
-        }
-
     }
 
 }
