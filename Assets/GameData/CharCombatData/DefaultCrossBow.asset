@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DefaultCrossBow
   m_EditorClassIdentifier: 
   hp: 100
-  physicalAttack: 10
+  physicalAttack: 40
   magicAttack: 0
   physicalDefence: 3
   magicDefence: 3

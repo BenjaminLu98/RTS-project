@@ -38,14 +38,12 @@ public class StateManager
         
         // High level state machine change state.
         foreach(KeyValuePair<string, Func<bool>> condition in conditions.Where(condition => condition.Key == current.Name && condition.Value())){
-            Debug.LogWarning("high level state change!"+ stateDic[condition.Key].Name);
             Name = condition.Key;
             return;
         }
         
         // Low level state machine change state.
         foreach(KeyValuePair<string, Func<bool>> condition in current.Conditions.Where(condition => condition.Value())){
-            Debug.LogWarning("low level state change!:"+ stateDic[condition.Key].Name);
             Name = condition.Key;
             return;
         }

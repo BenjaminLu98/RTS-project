@@ -30,6 +30,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     private float countDown = 0;
     private IUnit.dir faceDirection;
     private float maxSpeed = 3f;
+    private bool isDead = false;
 
     public CombatData defaultCombatData;
     public CombatData combatData;
@@ -45,7 +46,10 @@ public abstract class Unit : MonoBehaviour, IUnit
         InitializeStateManager();
         combatData = Instantiate<CombatData>(defaultCombatData);
 
-        onDeath += (() => { Debug.LogWarning("I am dead!!"); });
+        onDeath += (() => { 
+            Debug.LogWarning("I am dead!!");
+            isDead = true;
+        });
 
     }
 
@@ -334,14 +338,16 @@ public abstract class Unit : MonoBehaviour, IUnit
         state = new StateManager();
         state.addStatus("Idle", new State()
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); Debug.Log("Idle onStart"); })
-            .OnStay(() => { Debug.Log(HP); })
+            .OnStay(() => { })
             .OnExit(() => Debug.Log("exit idle"))
+            .addCondition("Die",()=> isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Run", () => !targetPosition.Equals(transform.position))
             .addCondition("Attack", () => ts.getTarget(obj) != null && countDown <= 0)
             );
 
         state.addStatus("Rotate", new State()
+            .addCondition("Die", () => isDead)
             .addCondition("Idle", () => targetPosition.Equals(transform.position) && faceRotation.Equals(modelTransform.rotation))
             .addCondition("Run", () => faceRotation.Equals(modelTransform.rotation) && !targetPosition.Equals(transform.position))
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", true); Debug.Log("rotate onStart"); })
@@ -353,6 +359,7 @@ public abstract class Unit : MonoBehaviour, IUnit
             .OnExit(() => { Debug.Log("Rotate exit"); })
             );
         state.addStatus("Run", new State()
+            .addCondition("Die", () => isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Idle", () => targetPosition.Equals(transform.position))
             .addCondition("Attack", () => ts.getTarget(obj) != null && countDown <= 0)
@@ -395,7 +402,7 @@ public abstract class Unit : MonoBehaviour, IUnit
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", true); animator.SetBool("isRotating", false); })
             .OnStay(() =>
             {
-                Debug.Log("Attack stay"+ AttackInterval);
+                //Debug.Log("Attack stay"+ AttackInterval);
                 attackDuration -= Time.deltaTime;
             })
             .OnExit(() =>
@@ -406,6 +413,29 @@ public abstract class Unit : MonoBehaviour, IUnit
             }
 
             ));
+
+        state.addStatus("Die", new State()
+            .addCondition("Finish",() => animator.GetCurrentAnimatorStateInfo(0).IsName("Die")&&animator.GetCurrentAnimatorStateInfo(0).normalizedTime>=1)
+            .OnStart(()=> {
+                animator.SetBool("isDead", true);
+
+            })
+            .OnStay(()=> {
+                Debug.LogWarning(animator.GetCurrentAnimatorStateInfo(0).IsName("Die"));
+                Debug.LogWarning(animator.GetCurrentAnimatorStateInfo(0).normalizedTime);
+            })
+            );
+        state.addStatus("Finish", new State()
+            .OnStart(() =>
+            {
+                gameObject.AddComponent<BodyCollapse>();
+                GridSystem.current.removeValue(x, z);
+                Destroy(this);
+            })
+            .OnStay(()=>{
+                transform.position = transform.position - 0.5f * Time.deltaTime * Vector3.up;
+            }));
+        
         state.Name = "Idle";
     }
 
@@ -722,4 +752,5 @@ public abstract class Unit : MonoBehaviour, IUnit
         }
 
     }
+
 }
