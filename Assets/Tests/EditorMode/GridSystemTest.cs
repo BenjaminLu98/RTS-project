@@ -35,7 +35,7 @@ public class GridSystemTest
     public void getWorldPositionShouldReturnCorrectPosition()
     {
         var position = GridSystem.current.getWorldPosition(10, 11);
-        var expectedPosition = new Vector3(10 * GridSystem.sideLength, 1 * GridSystem.sideLength, 11 * GridSystem.sideLength);
+        var expectedPosition = new Vector3(10 * GridSystem.current.sideLength, 1 * GridSystem.current.sideLength, 11 * GridSystem.current.sideLength);
         Assert.AreEqual(position, expectedPosition);
     }
 
@@ -43,7 +43,7 @@ public class GridSystemTest
     public void getWorldPositionShouldRejectTooLargePosition()
     {
         LogAssert.ignoreFailingMessages = true;
-        var position = GridSystem.current.getWorldPosition(GridSystem.width+1, GridSystem.height+1);
+        var position = GridSystem.current.getWorldPosition(GridSystem.current.width+1, GridSystem.current.height+1);
         Assert.AreEqual(position,new Vector3(0,0,0));
     }
 
@@ -134,7 +134,7 @@ public class GridSystemTest
     [Test]
     public void UtilCalculateDistanceShouldReturnCorrectDistance()
     {
-        Assert.IsTrue(float.Equals(GridUtils.calculateDistance(3, 3, 5, 5),2f*Mathf.Pow(2f,0.5f)*GridSystem.sideLength));
+        Assert.IsTrue(float.Equals(GridUtils.calculateDistance(3, 3, 5, 5),2f*Mathf.Pow(2f,0.5f)*GridSystem.current.sideLength));
         
     }
 

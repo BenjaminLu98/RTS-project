@@ -28,9 +28,9 @@ public class PathFinding
         openList = new List<GridData> { startNode };
         closeList = new List<GridData>();
         
-        for(int x=0; x < GridSystem.width; x++)
+        for(int x=0; x < GridSystem.current.width; x++)
         {
-            for(int z=0; z< GridSystem.height; z++)
+            for(int z=0; z< GridSystem.current.height; z++)
             {
                 var node = GridSystem.current.getGridData(x, z);
                 node.GCost = int.MaxValue;
