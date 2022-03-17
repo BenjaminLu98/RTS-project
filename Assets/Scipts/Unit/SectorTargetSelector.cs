@@ -19,7 +19,6 @@ public class SectorTargetSelector : TargetSelector
     public override Unit getTarget(int x, int z, IUnit.dir dir)
     {
         List<Unit> targetList = getTargets(x, z, dir);
-        Debug.LogWarning(targetList.Count) ;
 
         float smallestDistance = float.MaxValue;
         Unit smallestUnit = null;

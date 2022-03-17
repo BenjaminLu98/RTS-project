@@ -14,7 +14,7 @@ public class GridUtils
     /// <returns></returns>
     public static Vector3 ScreenToGridPlane()
     {
-        Plane plane = new Plane(Vector3.up, GridSystem.origin);
+        Plane plane = new Plane(Vector3.up, GridSystem.current.origin);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         float distanceToPlane;
         if (plane.Raycast(ray, out distanceToPlane))
@@ -87,8 +87,8 @@ public class GridUtils
         var position = node.Position;
         var x = position.x;
         var y = position.y;
-        var width = GridSystem.width;
-        var height = GridSystem.height;
+        var width = GridSystem.current.width;
+        var height = GridSystem.current.height;
         // left side
         if (x > 0)
         {
@@ -114,9 +114,9 @@ public class GridUtils
     public static List<GridData> GetOccupied()
     {
         var list = new List<GridData>();
-        for (int i = 0; i < GridSystem.width; i++)
+        for (int i = 0; i < GridSystem.current.width; i++)
         {
-            for (int j = 0; j < GridSystem.height; j++)
+            for (int j = 0; j < GridSystem.current.height; j++)
             {
                 if (GridSystem.current.getGridData(i, j).IsOccupied)
                 {
@@ -133,8 +133,8 @@ public class GridUtils
         var position = node.Position;
         var x = position.x;
         var y = position.y;
-        var width = GridSystem.width;
-        var height = GridSystem.height;
+        var width = GridSystem.current.width;
+        var height = GridSystem.current.height;
         // left side
         if (x > 0)
         {
@@ -181,7 +181,7 @@ public class GridUtils
 
     public static float calculateDistance(int x1, int z1, int x2, int z2)
     {
-       return Vector2Int.Distance(new Vector2Int(x1, z1), new Vector2Int(x2, z2))*GridSystem.sideLength;
+       return Vector2Int.Distance(new Vector2Int(x1, z1), new Vector2Int(x2, z2))*GridSystem.current.sideLength;
     }
 
 }

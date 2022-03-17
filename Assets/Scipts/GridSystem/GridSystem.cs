@@ -1,32 +1,104 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
-//TODO: generic
+[System.Serializable]
 public class GridSystem
 {
-    public static Vector3 origin;
-    public static int width = 100;
-    public static int height = 100;
-    public static float sideLength = 1f;
-    static GridData[,] gridDataArray;
+    public Vector3 origin;
+    public int width = 100;
+    public int height = 100;
+    public float sideLength = 1f;
+    GridData[,] gridDataArray;
 
-    public static GridSystem gridSystem=new GridSystem();
+    public static GridSystem gridSystem;
     public static GridSystem current
     {
         get
         {
+            if(gridSystem == null)
+            {
+                string jsonText = File.ReadAllText(Application.persistentDataPath + "/RTS_data/Map.prefab.json");
+                gridSystem = new GridSystem();
+                GridSystem.gridSystem.fromJson(jsonText);
+                if (GridSystem.Initialized == false) Debug.LogError("GridSystem not initialized properly");
+            }
             return gridSystem;
         }
     }
 
-    static GridSystem()
+    public static bool Initialized
+    {
+        get
+        {
+            return !(gridSystem.gridDataArray == null);
+        }
+    }
+
+    public string toJson()
+    {
+        GridData[] _1dArray = new GridData[width * height];
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                _1dArray[i*height+j] = gridDataArray[i, j];
+            }
+        }
+        var wrapper = new GridDataWrapper(_1dArray,origin,width,height,sideLength);
+        return JsonUtility.ToJson(wrapper);
+    }
+
+    public void fromJson(string str)
+    {
+        var wrapper = JsonUtility.FromJson<GridDataWrapper>(str);
+        origin = wrapper.origin;
+        width = wrapper.width;
+        height = wrapper.height;
+        sideLength = wrapper.sideLength;
+        gridDataArray = new GridData[width, height];
+        for(int i = 0; i < wrapper.gridDataArray.Length; i++)
+        {
+            gridDataArray[i / height, i % height] = wrapper.gridDataArray[i];
+        }
+    }
+
+    public void Initialzation()
     {
         origin = new Vector3(0, 0, 0);
         gridDataArray = new GridData[width, height];
         for(int i = 0; i < width; i++)
         {
             for(int j = 0; j < height; j++)
+            {
+                gridDataArray[i, j] = new GridData(0, new Vector2Int(i, j), 0, CubeType.Grass);
+            }
+        }
+    }
+
+    public void clearArrayAndCubes()
+    {
+        if (gridDataArray == null) return;
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                gridDataArray[i, j].Cube.ForEach((e)=>e.DestroyInstance());
+            }
+        }
+        gridDataArray = null;
+    }
+
+    public void Initialzation(Vector3 origin, int width, int height)
+    {
+        GridSystem.current.origin = origin;
+        GridSystem.current.width = width;
+        GridSystem.current.height = height;
+        gridDataArray = new GridData[width, height];
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
             {
                 gridDataArray[i, j] = new GridData(0, new Vector2Int(i, j), 0, CubeType.Grass);
             }
@@ -267,7 +339,7 @@ public class GridSystem
     /// <returns></returns>
     public bool checkWidthHeight(int x, int z, int width = 1, int height = 1)
     {
-        if (x >= 0 && z >= 0 && x + width <= GridSystem.width && z + height <= GridSystem.height) return true;
+        if (x >= 0 && z >= 0 && x + width <= GridSystem.current.width && z + height <= GridSystem.current.height) return true;
         else return false;
     }
 
@@ -312,7 +384,7 @@ public class GridSystem
         //check if there is a blank grid backward
         for(int i = 0; i < width; i++)
         {
-            if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < GridSystem.width && gridCoordinate.y >= 0 && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y].IsOccupied)
+            if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < GridSystem.current.width && gridCoordinate.y >= 0 && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y].IsOccupied)
             {
                 return new Vector2Int(gridCoordinate.x + i, gridCoordinate.y);
             }
@@ -321,7 +393,7 @@ public class GridSystem
         //check if there is a blank grid left
         for(int j=0;j<height;j++)
         {
-            if(gridCoordinate.y + j>=0 && gridCoordinate.y + j < GridSystem.height && gridCoordinate.x >=0 && !gridDataArray[gridCoordinate.x, gridCoordinate.y+j].IsOccupied)
+            if(gridCoordinate.y + j>=0 && gridCoordinate.y + j < GridSystem.current.height && gridCoordinate.x >=0 && !gridDataArray[gridCoordinate.x, gridCoordinate.y+j].IsOccupied)
             {
                 return new Vector2Int(gridCoordinate.x, gridCoordinate.y + j);
             }
@@ -330,7 +402,7 @@ public class GridSystem
         //check if there is a blank grid forward
         for (int i = 0; i < width; i++)
         {
-            if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < GridSystem.width && gridCoordinate.y + height - 1  < GridSystem.height && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y + height-1].IsOccupied)
+            if (gridCoordinate.x + i >= 0 && gridCoordinate.x + i < GridSystem.current.width && gridCoordinate.y + height - 1  < GridSystem.current.height && !gridDataArray[gridCoordinate.x + i, gridCoordinate.y + height-1].IsOccupied)
             {
                 return new Vector2Int(gridCoordinate.x + i, gridCoordinate.y + height -1);
             }
@@ -339,7 +411,7 @@ public class GridSystem
         //check if there is a blank grid right
         for (int j = 0; j < height; j++)
         {
-            if (gridCoordinate.y + j >= 0 && gridCoordinate.y + j < GridSystem.height && gridCoordinate.x + width -1 < GridSystem.width && !gridDataArray[gridCoordinate.x + width -1, gridCoordinate.y + j].IsOccupied)
+            if (gridCoordinate.y + j >= 0 && gridCoordinate.y + j < GridSystem.current.height && gridCoordinate.x + width -1 < GridSystem.current.width && !gridDataArray[gridCoordinate.x + width -1, gridCoordinate.y + j].IsOccupied)
             {
                 return new Vector2Int(gridCoordinate.x + width -1, gridCoordinate.y + j);
             }
