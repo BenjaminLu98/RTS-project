@@ -12,12 +12,27 @@ public class GridSystem
     public float sideLength = 1f;
     GridData[,] gridDataArray;
 
-    public static GridSystem gridSystem=new GridSystem();
+    public static GridSystem gridSystem;
     public static GridSystem current
     {
         get
         {
+            if(gridSystem == null)
+            {
+                string jsonText = File.ReadAllText(Application.persistentDataPath + "/RTS_data/Map.prefab.json");
+                gridSystem = new GridSystem();
+                GridSystem.gridSystem.fromJson(jsonText);
+                if (GridSystem.Initialized == false) Debug.LogError("GridSystem not initialized properly");
+            }
             return gridSystem;
+        }
+    }
+
+    public static bool Initialized
+    {
+        get
+        {
+            return !(gridSystem.gridDataArray == null);
         }
     }
 
