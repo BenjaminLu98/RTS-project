@@ -17,7 +17,7 @@ public class MouseOperation : MonoBehaviour
     void Start()
     {
         dragSlection = false;
-        map = GetComponent<SelectionMap>();
+        map = new SelectionMap();
     }
 
     // Update is called once per frame
@@ -52,12 +52,15 @@ public class MouseOperation : MonoBehaviour
                 {
                     if (Input.GetKey(KeyCode.LeftShift)) //inclusive select
                     {
-                        map.add(hit.transform.gameObject);
+                         if (hit.collider.gameObject.layer==7)map.add(hit.transform.gameObject);
                     }
                     else //exclusive selected
                     {
                         map.removeAll();
-                        map.add(hit.transform.gameObject);
+                        if (hit.collider.gameObject.layer == 7)
+                        {
+                            map.add(hit.transform.gameObject);
+                        }
                     }
                 }
             }
@@ -89,7 +92,6 @@ public class MouseOperation : MonoBehaviour
                 //First do a raycast from p1 and p2 in Selection layer.
                 //After getting p1w and p2w, calculate the center and halfExtent, using OverlapBox to get All the collider within the box.
                 //Note that we need to set selectable unit to layer"selectable".
-
                 int mask = 1 << 6;
                 Ray p1Ray = Camera.main.ScreenPointToRay(p1);
                 Ray p2Ray = Camera.main.ScreenPointToRay(p2);

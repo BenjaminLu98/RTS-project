@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SelectionMap : MonoBehaviour
+public class SelectionMap
 {
     public Dictionary<int, GameObject> selectionMap=new Dictionary<int, GameObject>();
+    string currentTag;
 
     //TODO: select building
     /// <summary>
@@ -13,6 +14,11 @@ public class SelectionMap : MonoBehaviour
     /// <param name="obj"></param>
     public void add(GameObject obj)
     {
+        if (obj.tag != currentTag&&selectionMap.Count!=0)
+        {
+            removeAll();
+        }
+        currentTag = obj.tag;
         if (obj != null)
         {
             int id = obj.GetInstanceID();
@@ -21,20 +27,17 @@ public class SelectionMap : MonoBehaviour
                 selectionMap.Add(id, obj);
                 obj.AddComponent<SelectionComponent>();
                 Debug.Log("Added " + id + " to selected dict");
-
             }
         }
-
     }
 
     public void remove(GameObject obj)
     {
         if (obj != null)
         {
-            DestroyImmediate(obj.GetComponent<SelectionComponent>());
+            GameObject.DestroyImmediate(obj.GetComponent <SelectionComponent>());
             selectionMap.Remove(obj.GetInstanceID());
             Debug.Log("Removed " + obj.gameObject.GetInstanceID() + " to selected dict");
-
         }
 
     }
@@ -45,12 +48,11 @@ public class SelectionMap : MonoBehaviour
         {
             if (pair.Value != null)
             {
-                DestroyImmediate(pair.Value.GetComponent<SelectionComponent>());
+                GameObject.DestroyImmediate(pair.Value.GetComponent<SelectionComponent>());
                 Debug.Log("Removed " + pair.Value.GetInstanceID() + " to selected dict");
             }
    
         }
         selectionMap.Clear();
-
     }
 }

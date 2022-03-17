@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Unit : MonoBehaviour, IUnit
+public abstract class Unit : MonoBehaviour, IUnit, IMoveable
 {
     public static List<Unit> unitList;
 
@@ -47,6 +47,7 @@ public abstract class Unit : MonoBehaviour, IUnit
     {
         unitList.Add(this);
     }
+    
 
     private void OnDestroy()
     {
@@ -62,6 +63,11 @@ public abstract class Unit : MonoBehaviour, IUnit
         pf = new PathFinding();
         InitializeStateManager();
         currentCombatStatus = Instantiate<CombatData>(defaultCombatData);
+
+
+        this.gameObject.tag = "Unit";
+        this.gameObject.layer = 7;
+
 
         onDeath += (() => { 
             Debug.LogWarning("I am dead!!");

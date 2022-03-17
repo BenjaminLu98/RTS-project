@@ -66,16 +66,6 @@ public interface IUnit :IPlaceableObj
         get;
     }
 
-    
-    /// <summary>
-    /// Rotate to the target and move to the target position with animation. 
-    /// </summary>
-    /// <param name="worldPosition">target position</param>
-    /// <param name="speed"></param>
-    public void moveTo(Vector3 worldPosition, float speed);
-    //Move to the target position with animation
-    public void moveTo(int x, int z, float speed);
-
     /// <summary>
     /// Attack the gameObject at position(x,z). If there is no unit in the target posiiton, do nothing.
     /// </summary>

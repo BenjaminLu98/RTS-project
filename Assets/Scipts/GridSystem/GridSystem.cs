@@ -17,12 +17,21 @@ public class GridSystem
     {
         get
         {
+            
             if(gridSystem == null)
             {
-                string jsonText = File.ReadAllText(Application.persistentDataPath + "/RTS_data/Map.prefab.json");
-                gridSystem = new GridSystem();
-                GridSystem.gridSystem.fromJson(jsonText);
-                if (GridSystem.Initialized == false) Debug.LogError("GridSystem not initialized properly");
+                if(File.Exists(Application.persistentDataPath + "/RTS_data/Map.prefab.json"))
+                {
+                    string jsonText = File.ReadAllText(Application.persistentDataPath + "/RTS_data/Map.prefab.json");
+                    gridSystem = new GridSystem();
+                    GridSystem.gridSystem.fromJson(jsonText);
+                    if (GridSystem.Initialized == false) Debug.LogError("GridSystem not initialized properly");
+                }
+                else
+                {
+                    gridSystem = new GridSystem();
+                }
+                
             }
             return gridSystem;
         }
@@ -84,7 +93,7 @@ public class GridSystem
         {
             for (int j = 0; j < height; j++)
             {
-                gridDataArray[i, j].Cube.ForEach((e)=>e.DestroyInstance());
+                gridDataArray[i, j].Cube?.ForEach((e)=>e.DestroyInstance());
             }
         }
         gridDataArray = null;

@@ -64,7 +64,7 @@ public class TestGridSystem : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.A))
         {
-            keep.produce(0);
+            
         }
         //GridSystem.current.UpdateGridVal();
     }

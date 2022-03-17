@@ -6,6 +6,15 @@ public abstract class Building : MonoBehaviour,IBuilding
 {
     protected List<GameObject> trainableUnits;
     [SerializeField] protected GameObject previewPrefab;
+    protected ResourceLoader rl;
+
+    protected void Start()
+    {
+        gameObject.tag = "Building";
+        gameObject.layer = 7;
+        trainableUnits = new List<GameObject>();
+        rl = FindObjectOfType<ResourceLoader>();
+    }
 
     public List<GameObject> TrainableUnits { 
         get

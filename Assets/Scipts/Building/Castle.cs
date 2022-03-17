@@ -12,8 +12,7 @@ public class Castle : Building
 
     private void Start()
     {
-        trainableUnits = new List<GameObject>();
-        ResourceLoader rl = FindObjectOfType<ResourceLoader>();
+        base.Start();
         //Archer
         trainableUnits.Add(rl.resourceList[0]);
     }

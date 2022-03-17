@@ -1,18 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &267386617805813039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 267386616529349125}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0277b97ecea6ec64fa10326d85fc4092, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unit: {fileID: 7683877465722186494}
 --- !u!1 &3345775618385036617
 GameObject:
   m_ObjectHideFlags: 0
@@ -55,7 +42,7 @@ GameObject:
   - component: {fileID: 7683877465722186494}
   - component: {fileID: 197534834}
   - component: {fileID: 7825419689919846093}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: CrossBow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -92,7 +79,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   obj: {fileID: 0}
   defaultCombatData: {fileID: 11400000, guid: 1b3ea81e1a8895149916d3f5ff4f0781, type: 2}
-  combatData: {fileID: 0}
+  currentCombatStatus: {fileID: 0}
 --- !u!65 &197534834
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -121,6 +108,7 @@ MonoBehaviour:
   healthBarPrefab: {fileID: 4568647113645102023, guid: dabb9e1d561c6ad48b4230ce70d22044,
     type: 3}
   alwaysShow: 0
+  showTime: 1
   anchor: {fileID: 1587403638438131652}
 --- !u!1001 &267386616529474503
 PrefabInstance:
@@ -1184,3 +1172,16 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 267386616529474503}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &267386617805813039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267386616529349125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0277b97ecea6ec64fa10326d85fc4092, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unit: {fileID: 7683877465722186494}
