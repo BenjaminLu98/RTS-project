@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class SkillUIManager : MonoBehaviour
 {
+    const int MAX_SKILL_NUM = 8;
+
     Image[] SkIllSlotUI;
     List<Image> addedSkillUI;
 
@@ -24,22 +26,16 @@ public class SkillUIManager : MonoBehaviour
     public void refreshSkillUI(SkillUIData uiData)
     {
         if (uiData == null) return;
-        var skillImages=new Sprite[8];
-        skillImages[0] = uiData.skill1;
-        skillImages[1] = uiData.skill2;
-        skillImages[2] = uiData.skill3;
-        skillImages[3] = uiData.skill4;
-        skillImages[4] = uiData.skill5;
-        skillImages[5] = uiData.skill6;
-        skillImages[6] = uiData.skill7;
-        skillImages[7] = uiData.skill8;
-
-        for(var i = 0; i < 8; i++)
+        for(var i = 0; i < MAX_SKILL_NUM; i++)
         {
-            if(skillImages[i] != null)
+            if (i < uiData.skills.Length)
             {
-                CreateSkillImage(skillImages, i);
+                if (uiData.skills[i] != null)
+                {
+                    CreateSkillImage(uiData.skills, i);
+                }
             }
+            else break;
         }
     }
 

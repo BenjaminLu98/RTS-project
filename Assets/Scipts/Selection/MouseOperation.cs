@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class MouseOperation : MonoBehaviour
 {
@@ -14,15 +15,20 @@ public class MouseOperation : MonoBehaviour
     SelectionMap map;
     RaycastHit hit;
 
+    int UILayer;
+    
+
     void Start()
     {
         dragSlection = false;
         map = new SelectionMap();
+        UILayer = LayerMask.NameToLayer("UI");
     }
 
     // Update is called once per frame
     void Update()
     {
+
         // Mouse is clicked down
         if (Input.GetMouseButtonDown(0))
         {
@@ -41,11 +47,11 @@ public class MouseOperation : MonoBehaviour
         //Mouse is released. 
         else if (Input.GetMouseButtonUp(0))
         {
-            if (!Input.GetKey(KeyCode.LeftShift))
+            if (!Input.GetKey(KeyCode.LeftShift)&&!IsPointerOverUIElement())
             {
                 map.removeAll();
             }
-            if (!dragSlection)
+            if (!dragSlection && !IsPointerOverUIElement())
             {
                 Ray ray = Camera.main.ScreenPointToRay(p1);
                 if (Physics.Raycast(ray, out hit, 50000.0f))
@@ -92,7 +98,7 @@ public class MouseOperation : MonoBehaviour
                 //First do a raycast from p1 and p2 in Selection layer.
                 //After getting p1w and p2w, calculate the center and halfExtent, using OverlapBox to get All the collider within the box.
                 //Note that we need to set selectable unit to layer"selectable".
-                int mask = 1 << 6;
+                int mask = (1 << 6) ;
                 Ray p1Ray = Camera.main.ScreenPointToRay(p1);
                 Ray p2Ray = Camera.main.ScreenPointToRay(p2);
                 RaycastHit p1Hit;
@@ -217,5 +223,35 @@ public class MouseOperation : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         map.add(other.gameObject);
+    }
+
+    //Returns 'true' if we touched or hovering on Unity UI element.
+    public bool IsPointerOverUIElement()
+    {
+        return IsPointerOverUIElement(GetEventSystemRaycastResults());
+    }
+
+
+    //Returns 'true' if we touched or hovering on Unity UI element.
+    private bool IsPointerOverUIElement(List<RaycastResult> eventSystemRaysastResults)
+    {
+        for (int index = 0; index < eventSystemRaysastResults.Count; index++)
+        {
+            RaycastResult curRaysastResult = eventSystemRaysastResults[index];
+            if (curRaysastResult.gameObject.layer == UILayer)
+                return true;
+        }
+        return false;
+    }
+
+
+    //Gets all event system raycast results of current mouse or touch position.
+    static List<RaycastResult> GetEventSystemRaycastResults()
+    {
+        PointerEventData eventData = new PointerEventData(EventSystem.current);
+        eventData.position = Input.mousePosition;
+        List<RaycastResult> raysastResults = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, raysastResults);
+        return raysastResults;
     }
 }

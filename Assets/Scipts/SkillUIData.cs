@@ -10,14 +10,6 @@ using UnityEngine.UI;
 public class SkillUIData: ScriptableObject
 {
     [Header("skill image")]
-    public Sprite skill1;
-    public Action skill1Callback;
-    public Sprite skill2;
-    public Sprite skill3;
-    public Sprite skill4;
-    public Sprite skill5;
-    public Sprite skill6;
-    public Sprite skill7;
-    public Sprite skill8;
+    public Sprite[] skills;
 }
 
