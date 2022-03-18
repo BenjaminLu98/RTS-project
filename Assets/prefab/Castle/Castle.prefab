@@ -47,6 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   previewPrefab: {fileID: 4394565833366194244, guid: 0fd0960d106c24f4d8baa09b18847192,
     type: 3}
+  skillUIData: {fileID: 11400000, guid: 57ca1866ea290c641b42283888efb7e7, type: 2}
 --- !u!65 &6719984913608979978
 BoxCollider:
   m_ObjectHideFlags: 0

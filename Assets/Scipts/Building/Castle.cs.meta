@@ -3,7 +3,9 @@ guid: 5daa0121d765bbf499709fd62a26ecd0
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - previewPrefab: {instanceID: 0}
+  - skillUIData: {fileID: 11400000, guid: 57ca1866ea290c641b42283888efb7e7, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

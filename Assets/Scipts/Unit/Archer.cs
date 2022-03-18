@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Archer : Unit
 {
-    private void Awake()
+    protected void Awake()
     {
         base.Awake();
         width = 1;
@@ -14,7 +14,7 @@ public class Archer : Unit
         
     }
 
-    private void Start()
+    protected void Start()
     {
         base.Start();
         ts = new SectorTargetSelector(TeamNo, 3, 128f);

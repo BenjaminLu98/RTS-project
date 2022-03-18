@@ -10,7 +10,7 @@ public class Castle : Building
         height = 4;
     }
 
-    private void Start()
+    protected void Start()
     {
         base.Start();
         //Archer

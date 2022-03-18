@@ -7,6 +7,7 @@ public abstract class Building : MonoBehaviour,IBuilding
     protected List<GameObject> trainableUnits;
     [SerializeField] protected GameObject previewPrefab;
     protected ResourceLoader rl;
+    [SerializeField] private SkillUIData skillUIData;
 
     protected void Start()
     {
@@ -103,6 +104,8 @@ public abstract class Building : MonoBehaviour,IBuilding
             return currentDir;
         }
     }
+
+    public SkillUIData SkillUIData { get => skillUIData; set => skillUIData = value; }
 
     /// <summary>
     /// rotate around the y axis in counter clockwise direction

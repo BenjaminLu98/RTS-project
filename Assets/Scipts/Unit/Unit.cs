@@ -445,8 +445,8 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
 
             })
             .OnStay(()=> {
-                Debug.LogWarning(animator.GetCurrentAnimatorStateInfo(0).IsName("Die"));
-                Debug.LogWarning(animator.GetCurrentAnimatorStateInfo(0).normalizedTime);
+                //Debug.LogWarning(animator.GetCurrentAnimatorStateInfo(0).IsName("Die"));
+                //Debug.LogWarning(animator.GetCurrentAnimatorStateInfo(0).normalizedTime);
             })
             );
         state.addStatus("Finish", new State()

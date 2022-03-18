@@ -19,6 +19,7 @@ public class SelectionMap
             removeAll();
         }
         currentTag = obj.tag;
+
         if (obj != null)
         {
             int id = obj.GetInstanceID();

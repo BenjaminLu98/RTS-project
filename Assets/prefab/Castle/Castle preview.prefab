@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4394565833366194245}
-  - component: {fileID: 3170100881933637667}
   - component: {fileID: 33327779771229059}
+  - component: {fileID: -1790913246410307151}
   m_Layer: 0
   m_Name: Castle preview
   m_TagString: Untagged
@@ -33,19 +33,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3170100881933637667
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4394565833366194244}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5daa0121d765bbf499709fd62a26ecd0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  previewPrefab: {fileID: 0}
 --- !u!65 &33327779771229059
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -59,6 +46,20 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 3.2379463, y: 4.305769, z: 3.4087505}
   m_Center: {x: 1.968196, y: 1.6528847, z: 2.0338006}
+--- !u!114 &-1790913246410307151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4394565833366194244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5daa0121d765bbf499709fd62a26ecd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  previewPrefab: {fileID: 4394565833366194244}
+  skillUIData: {fileID: 11400000, guid: 57ca1866ea290c641b42283888efb7e7, type: 2}
 --- !u!1 &8518149390742686517
 GameObject:
   m_ObjectHideFlags: 0
