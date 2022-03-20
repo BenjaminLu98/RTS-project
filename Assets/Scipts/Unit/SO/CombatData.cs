@@ -13,5 +13,5 @@ public class CombatData : ScriptableObject
     public float magicDefence;
     public float mana;
     public float attackInterval;
-    public float attackRange;
+    public int attackRange;
 }

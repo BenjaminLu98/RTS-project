@@ -38,23 +38,22 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     private IUnit.dir faceDirection;
     private float maxSpeed = 3f;
     private bool isDead = false;
-    private int teamNo;
+    public int teamNo;
 
-    public CombatData defaultCombatData;
-    public CombatData currentCombatStatus;
-
-    protected void Awake()
-    {
-        unitList.Add(this);
-    }
-    
+    [SerializeField]
+    protected CombatData defaultCombatData;
+    protected CombatData currentCombatStatus;
+    protected Animator animator;
 
     private void OnDestroy()
     {
         unitList.Remove(this);
     }
-    protected void Start()
+    protected void Awake()
     {
+        unitList.Add(this);
+
+        animator = transform.GetChild(0).GetComponent<Animator>();
         animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false);
         targetPosition = transform.position;
         nextPosition = transform.position;
@@ -146,7 +145,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         moveTo(targetPosition, speed);
     }
 
-    protected Animator animator;
+    
 
     public Animator Animator
     {
@@ -289,7 +288,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                 Debug.LogError("combatData is null");
         }
     }
-    public float AttackRange
+    public int AttackRange
     {
         get
         {
@@ -606,13 +605,17 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     {
         //Find the target unit
         var target = ts.getTarget(x, z, faceDirection);
-        //deal damage
-        target.receiveDamage(type, currentCombatStatus);
+        float damage = -1;
+        if(target != null)
+        {
+            //deal damage
+            damage = target.receiveDamage(type, currentCombatStatus);
+        }
         //return actual damage
-        return 0;
+        return damage;
     }
 
-    public bool receiveDamage(IUnit.DamageType type, CombatData from)
+    public float receiveDamage(IUnit.DamageType type, CombatData from)
     {
         float damage = 0f;
         //calculate actual damage
@@ -626,13 +629,13 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                 break;
         }
         //apply damage
-        HP = Mathf.Clamp(HP - damage,0.0f,100.0f);
+        HP = Mathf.Clamp(HP - damage,0.0f,defaultCombatData.hp);
         onDamaged.Invoke(defaultCombatData.hp,HP);
 
         //if the damage is greater than hp, then the unit will die.
         if (HP.Equals(0.0f)) onDeath.Invoke();
 
-        return true;
+        return damage;
     }
 
     private void Update()

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Archer : Unit
+public class HeavyInfantry : Unit
 {
     protected void Awake()
     {
@@ -11,12 +11,11 @@ public class Archer : Unit
         height = 1;
         
         // TODO: define ts.
-        
+
     }
 
     protected void Start()
     {
-        
-        ts = new SectorTargetSelector(TeamNo, defaultCombatData.attackRange, 128f);
+        ts = new ForwardLineSelector(1,defaultCombatData.attackRange);
     }
 }

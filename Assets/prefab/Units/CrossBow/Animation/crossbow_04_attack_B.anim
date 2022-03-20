@@ -33220,7 +33220,8 @@ AnimationClip:
   - time: 0.56666666
     functionName: attack
     data: 
-    objectReferenceParameter: {fileID: 0}
+    objectReferenceParameter: {fileID: 11500000, guid: 0277b97ecea6ec64fa10326d85fc4092,
+      type: 3}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0

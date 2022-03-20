@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4172c16103bc8a04bb6ab73916217e7d, type: 3}
-  m_Name: DefaultCrossBow
+  m_Name: DefaultHeavyInfant
   m_EditorClassIdentifier: 
-  hp: 100
+  hp: 300
   physicalAttack: 40
   magicAttack: 0
-  physicalDefence: 3
-  magicDefence: 3
+  physicalDefence: 20
+  magicDefence: 20
   mana: 0
   attackInterval: 2
-  attackRange: 3
+  attackRange: 1

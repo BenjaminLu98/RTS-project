@@ -50,7 +50,7 @@ public interface IUnit :IPlaceableObj
         set;
     }
 
-    public float AttackRange
+    public int AttackRange
     {
         get;
         set;
@@ -77,6 +77,6 @@ public interface IUnit :IPlaceableObj
     /// <param name="expectedDamage"></param>
     /// <param name="type"></param>
     /// <returns></returns>
-    public bool receiveDamage(IUnit.DamageType type, CombatData from);
+    public float receiveDamage(IUnit.DamageType type, CombatData from);
 
 }

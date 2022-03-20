@@ -40,6 +40,23 @@ public class UnitUtil
         return Vector3.forward;
     }
 
+    public static Vector2Int getDirVector2D(IUnit.dir dir)
+    {
+        switch (dir)
+        {
+            case IUnit.dir.forward:
+                return new Vector2Int(0, 1);
+            case IUnit.dir.right:
+                return new Vector2Int(1, 0);
+            case IUnit.dir.backward:
+                return new Vector2Int(0, -1);
+            case IUnit.dir.left:
+                return new Vector2Int(-1, 0);
+        }
+        Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + ": no matching direction");
+        return new Vector2Int(0, 1);
+    }
+
     // Convert a vector(from->to ) to the four direction.
     public static IUnit.dir getDir(Vector2Int from, Vector2Int to)
     {

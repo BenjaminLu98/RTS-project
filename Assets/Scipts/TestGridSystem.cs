@@ -13,20 +13,20 @@ public class TestGridSystem : MonoBehaviour
         //GridSystem.current.InitializeGridVal();
         //var gs = GridSystem.current;
 
-        var crossbow1OBJ = Instantiate(crossbow);
-        var crossBow1 = crossbow1OBJ.GetComponent<Archer>();
-        crossBow1.TeamNo = 1;
-        crossBow1.placeAt(3, 4);
+        //var crossbow1OBJ = Instantiate(crossbow);
+        //var crossBow1 = crossbow1OBJ.GetComponent<Archer>();
+        //crossBow1.TeamNo = 1;
+        //crossBow1.placeAt(3, 4);
 
-        var crossbow2OBJ = Instantiate(crossbow);
-        var crossBow2 = crossbow2OBJ.GetComponent<Archer>();
-        crossBow2.TeamNo = 0;
-        crossBow2.placeAt(10, 4);
+        //var crossbow2OBJ = Instantiate(crossbow);
+        //var crossBow2 = crossbow2OBJ.GetComponent<Archer>();
+        //crossBow2.TeamNo = 0;
+        //crossBow2.placeAt(10, 4);
 
-        var crossbow3OBJ = Instantiate(crossbow);
-        var crossBow3 = crossbow3OBJ.GetComponent<Archer>();
-        crossBow3.TeamNo = 0;
-        crossBow3.placeAt(6, 3);
+        //var crossbow3OBJ = Instantiate(crossbow);
+        //var crossBow3 = crossbow3OBJ.GetComponent<Archer>();
+        //crossBow3.TeamNo = 0;
+        //crossBow3.placeAt(6, 3);
 
 
 

@@ -23,6 +23,7 @@ public class HealthBar : MonoBehaviour
     {
         Unit unit = GetComponent<Unit>();
         unit.onDamaged += Unit_onDamaged;
+        unit.onDeath += Unit_OnDeath;
         timeLeft = showTime;
     }
 
@@ -34,6 +35,11 @@ public class HealthBar : MonoBehaviour
         healthBar.SetActive(true);
         timeLeft = showTime;
         GreenSlider.fillAmount = percentage;
+    }
+
+    private void Unit_OnDeath()
+    {
+        Destroy(healthBar);
     }
 
     private void OnEnable()
