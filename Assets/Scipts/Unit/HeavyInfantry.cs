@@ -16,6 +16,6 @@ public class HeavyInfantry : Unit
 
     protected void Start()
     {
-        ts = new ForwardLineSelector(1,defaultCombatData.attackRange);
+        ts = new ForwardLineSelector(teamNo,defaultCombatData.attackRange);
     }
 }

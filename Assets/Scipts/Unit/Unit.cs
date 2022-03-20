@@ -16,7 +16,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     public event Action onDeath;
     public event Action<float, float> onDamaged;
 
-    protected float rotateSpeed = 180f;
+    protected float rotateSpeed = 250f;
     //protected bool isMoving = false;
     protected bool isRotating = false;
     protected int x;
@@ -316,7 +316,9 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         }
     }
 
-    public int TeamNo { get => teamNo; set => teamNo = value; }
+    public int TeamNo { 
+        get => teamNo;
+        set => teamNo = value; }
 
     public bool placeAt(int x, int z)
     {

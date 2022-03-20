@@ -7,7 +7,6 @@ using UnityEngine;
 
 public class ForwardLineSelector : TargetSelector
 {
-    int teamNo;
     int attackRange;
     public ForwardLineSelector(int teamNo, int attackRange)
     {
@@ -22,8 +21,14 @@ public class ForwardLineSelector : TargetSelector
             var attactVec = UnitUtil.getDirVector2D(dir) * (i + 1);
             foreach (var unit in Unit.unitList)
             {
-                var targetPos = attactVec + new Vector2Int(x,z);
-                if (targetPos == unit.Position) return unit;
+                if(unit.teamNo != teamNo)
+                {
+                    var targetPos = attactVec + new Vector2Int(x, z);
+                    if (targetPos == unit.Position)
+                    {
+                        return unit;
+                    }
+                }
             }
         }
         return null;
@@ -44,14 +49,18 @@ public class ForwardLineSelector : TargetSelector
         List<Unit> targets = new List<Unit>();
         foreach (var unit in Unit.unitList)
         {
-            for(int j = 0; j < attackRange; j++)
+            if (unit.teamNo != teamNo)
             {
-                var attactVec = UnitUtil.getDirVector2D(dir) * (j + 1);
-                var targetPos = attactVec + new Vector2Int(x, z);
-                if (targetPos == unit.Position)
+                for (int j = 0; j < attackRange; j++)
                 {
-                    targets.Add(unit);
-                    break;
+               
+                    var attactVec = UnitUtil.getDirVector2D(dir) * (j + 1);
+                    var targetPos = attactVec + new Vector2Int(x, z);
+                    if (targetPos == unit.Position)
+                    {
+                        targets.Add(unit);
+                        break;
+                    }
                 }
             }
         }
