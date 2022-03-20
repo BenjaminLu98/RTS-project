@@ -7,8 +7,8 @@ public class Archer : Unit
     protected void Awake()
     {
         base.Awake();
-        width = 1;
-        height = 1;
+        positionInfo.width = 1;
+        positionInfo.height = 1;
         
         // TODO: define ts.
         

@@ -10,7 +10,7 @@ public class ForwardLineSelector : TargetSelector
     int attackRange;
     public ForwardLineSelector(int teamNo, int attackRange)
     {
-        this.teamNo = teamNo;
+        this.TeamNo = teamNo;
         this.attackRange = attackRange;
     }
 
@@ -21,7 +21,7 @@ public class ForwardLineSelector : TargetSelector
             var attactVec = UnitUtil.getDirVector2D(dir) * (i + 1);
             foreach (var unit in Unit.unitList)
             {
-                if(unit.teamNo != teamNo)
+                if(unit.teamNo != TeamNo)
                 {
                     var targetPos = attactVec + new Vector2Int(x, z);
                     if (targetPos == unit.Position)
@@ -49,7 +49,7 @@ public class ForwardLineSelector : TargetSelector
         List<Unit> targets = new List<Unit>();
         foreach (var unit in Unit.unitList)
         {
-            if (unit.teamNo != teamNo)
+            if (unit.teamNo != TeamNo)
             {
                 for (int j = 0; j < attackRange; j++)
                 {

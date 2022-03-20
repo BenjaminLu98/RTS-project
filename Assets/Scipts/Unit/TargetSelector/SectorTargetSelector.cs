@@ -9,7 +9,7 @@ public class SectorTargetSelector : TargetSelector
 
     public SectorTargetSelector(int teamNo, float radius, float degree)
     {
-        this.teamNo = teamNo;
+        this.TeamNo = teamNo;
         this.radius = radius;
         this.degree = degree;
     }
@@ -51,7 +51,7 @@ public class SectorTargetSelector : TargetSelector
         foreach (Unit unit in Unit.unitList)
         {
             
-            if(unit.TeamNo != teamNo&& GridUtils.calculateDistance(unit.Position.x,unit.Position.y, x, z) <= radius)
+            if(unit.TeamNo != TeamNo&& GridUtils.calculateDistance(unit.Position.x,unit.Position.y, x, z) <= radius)
             {
                 Vector3 dirVector3 = UnitUtil.getDirVector(dir);
                 Vector2 dirVector2 = new Vector2(dirVector3.x, dirVector3.z);

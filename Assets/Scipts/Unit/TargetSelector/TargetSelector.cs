@@ -4,7 +4,9 @@ using UnityEngine;
 
 public abstract class TargetSelector
 {
-    protected int teamNo;
+    private int teamNo;
+
+    public int TeamNo { get => teamNo; set => teamNo = value; }
 
     abstract public List<Unit> getTargets(int x, int z, IUnit.dir dir);
 

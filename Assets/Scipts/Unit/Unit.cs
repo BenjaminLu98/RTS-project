@@ -19,12 +19,9 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     protected float rotateSpeed = 250f;
     //protected bool isMoving = false;
     protected bool isRotating = false;
-    protected int x;
-    protected int z;
+    protected PositionInfo positionInfo;
     protected int nextX;
     protected int nextZ;
-    protected int width;
-    protected int height;
     protected Vector3 targetPosition;
     protected Vector3 nextPosition;
     protected float trueSpeed = 2.0f;
@@ -52,7 +49,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     protected void Awake()
     {
         unitList.Add(this);
-
+        positionInfo = new PositionInfo();
         animator = transform.GetChild(0).GetComponent<Animator>();
         animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false);
         targetPosition = transform.position;
@@ -78,7 +75,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     {
         get
         {
-            return new Vector2Int(x, z);
+            return new Vector2Int(positionInfo.x, positionInfo.z);
         }
     }
 
@@ -97,12 +94,12 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     public Vector2Int Size {
         set
         {
-            width = value.x;
-            height = value.y;
+            positionInfo.width = value.x;
+            positionInfo.height = value.y;
         }
         get
         {
-            return new Vector2Int(width, height);
+            return new Vector2Int(positionInfo.width, positionInfo.height);
         }
     }
 
@@ -115,9 +112,9 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         int x, z;
         GridSystem.current.getXZ(targetPosition, out x, out z);
 
-        if (!GridSystem.current.checkOccupationExcept(x, z, width, height,this))
+        if (!GridSystem.current.checkOccupationExcept(x, z, positionInfo.width, positionInfo.height,this))
         {
-            var blank = GridSystem.current.getBlankGrid(new Vector2Int(x, z), width, height);
+            var blank = GridSystem.current.getBlankGrid(new Vector2Int(x, z), positionInfo.width, positionInfo.height);
             targetPosition = GridSystem.current.getWorldPosition(blank.x, blank.y);
         }
     }
@@ -129,9 +126,9 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         GridSystem.current.getXZ(WorldPosition, out x, out z);
         targetPosition = GridSystem.current.getWorldPosition(x, z);
 
-        if(!GridSystem.current.checkOccupationExcept(x, z,width,height,this))
+        if(!GridSystem.current.checkOccupationExcept(x, z, positionInfo.width, positionInfo.height,this))
         {
-            var blank = GridSystem.current.getBlankGrid(new Vector2Int(x,z),width,height);
+            var blank = GridSystem.current.getBlankGrid(new Vector2Int(x,z), positionInfo.width, positionInfo.height);
             targetPosition = GridSystem.current.getWorldPosition(blank.x, blank.y);
         }
 
@@ -318,20 +315,24 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
 
     public int TeamNo { 
         get => teamNo;
-        set => teamNo = value; }
+        set{
+            ts.TeamNo = value;
+            teamNo = value;
+        }
+    }
 
     public bool placeAt(int x, int z)
     {
-        bool isSuccess = GridSystem.current.setValue(x, z, 100, this, width, height);
+        bool isSuccess = GridSystem.current.setValue(x, z, 100, this, positionInfo.width, positionInfo.height);
         if (isSuccess)
         {
             Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
             transform.position = truePosition;
 
-            GridSystem.current.removeValue(this.x, this.z, width, height);
+            GridSystem.current.removeValue(positionInfo.x, positionInfo.z, positionInfo.width, positionInfo.height);
 
-            this.x = x;
-            this.z = z;
+            positionInfo.x = x;
+            positionInfo.z = z;
             return true;
         }
         return false;
@@ -340,7 +341,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
 
     public bool placeAt(Vector3 worldPosition)
     {
-        bool isSuccess = GridSystem.current.setValue(worldPosition, 100, this, width, height);
+        bool isSuccess = GridSystem.current.setValue(worldPosition, 100, this, positionInfo.width, positionInfo.height);
         if (isSuccess)
         {
             int x, z;
@@ -348,9 +349,9 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
             Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
             transform.position = truePosition;
 
-            GridSystem.current.removeValue(this.x, this.z, width, height);
-            this.x = x;
-            this.z = z;
+            GridSystem.current.removeValue(positionInfo.x, positionInfo.z, positionInfo.width, positionInfo.height);
+            positionInfo.x = x;
+            positionInfo.z = z;
             return true;
         }
         return false;
@@ -368,7 +369,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
             .addCondition("Die",()=> isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Run", () => !targetPosition.Equals(transform.position))
-            .addCondition("Attack", () => ts.getTarget(x,z,faceDirection) != null && countDown <= 0)
+            .addCondition("Attack", () => ts.getTarget(positionInfo.x, positionInfo.z,faceDirection) != null && countDown <= 0)
             );
 
         state.addStatus("Rotate", new State()
@@ -387,7 +388,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
             .addCondition("Die", () => isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Idle", () => targetPosition.Equals(transform.position))
-            .addCondition("Attack", () => ts.getTarget(x, z, faceDirection) != null && countDown <= 0)
+            .addCondition("Attack", () => ts.getTarget(positionInfo.x, positionInfo.z, faceDirection) != null && countDown <= 0)
             .OnStart(() => {  animator.SetBool("isRunning", true); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); ; Debug.Log("run onStart"); })
             .OnStay(() =>
             {
@@ -398,19 +399,19 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                     // TODO: update this logic so that find path can be called less frequently.
                     int targetX, targetY;
                     GridSystem.current.getXZ(targetPosition, out targetX, out targetY);
-                    var path = pf.FindPath(x, z, targetX, targetY);
+                    var path = pf.FindPath(positionInfo.x, positionInfo.z, targetX, targetY);
 
                     // Update moveDirection and targetRotation
                     faceDirection = UnitUtil.GetDirWithPF(path);
                     faceRotation = UnitUtil.getDirRotation(faceDirection);
                     updateNextPositonWithPF(faceDirection);
-                    faceDirection = UnitUtil.getDir(new Vector2Int(x, z), new Vector2Int(nextX, nextZ));
-                    GridSystem.current.setValue(nextX, nextZ, 1, this, width, height);
+                    faceDirection = UnitUtil.getDir(new Vector2Int(positionInfo.x, positionInfo.z), new Vector2Int(nextX, nextZ));
+                    GridSystem.current.setValue(nextX, nextZ, 1, this, positionInfo.width, positionInfo.height);
                 }
                 else
                 {
                     MoveToNextPosition();
-                    GridSystem.current.getXZ(transform.position, out this.x, out this.z);
+                    GridSystem.current.getXZ(transform.position, out positionInfo.x, out positionInfo.z);
                 }
             })
             .OnExit(() => { Debug.Log("Run exit"); })
@@ -454,7 +455,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
             .OnStart(() =>
             {
                 gameObject.AddComponent<BodyCollapse>();
-                GridSystem.current.removeValue(x, z);
+                GridSystem.current.removeValue(positionInfo.x, positionInfo.z);
                 Destroy(this);
             })
             .OnStay(()=>{
@@ -469,53 +470,53 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         switch (getDir())
         {
             case IUnit.dir.forward:
-                if (GridSystem.current.checkOccupationExcept(x, z + 1, width, height,this))
+                if (GridSystem.current.checkOccupationExcept(positionInfo.x, positionInfo.z + 1, positionInfo.width, positionInfo.height,this))
                 {
-                    nextX = x;
-                    nextZ = z + 1;
+                    nextX = positionInfo.x;
+                    nextZ = positionInfo.z + 1;
                 }
                 else
                 {
-                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x, z + 1), width, height);
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x, positionInfo.z + 1), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
                 }
                 break;
             case IUnit.dir.right:
-                if (GridSystem.current.checkOccupationExcept(x + 1, z, width, height,this))
+                if (GridSystem.current.checkOccupationExcept(positionInfo.x + 1, positionInfo.z, positionInfo.width, positionInfo.height,this))
                 {
-                    nextX = x + 1;
-                    nextZ = z;
+                    nextX = positionInfo.x + 1;
+                    nextZ = positionInfo.z;
                 }
                 else
                 {
-                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x + 1, z), width, height);
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x + 1, positionInfo.z), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
                 }
                 break;
             case IUnit.dir.backward:
-                if (GridSystem.current.checkOccupationExcept(x, z - 1, width, height,this))
+                if (GridSystem.current.checkOccupationExcept(positionInfo.x, positionInfo.z - 1, positionInfo.width, positionInfo.height,this))
                 {
-                    nextX = x;
-                    nextZ = z - 1;
+                    nextX = positionInfo.x;
+                    nextZ = positionInfo.z - 1;
                 }
                 else
                 {
-                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x, z - 1), width, height);
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x, positionInfo.z - 1), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
                 }
                 break;
             case IUnit.dir.left:
-                if (GridSystem.current.checkOccupationExcept(x - 1, z, width, height,this))
+                if (GridSystem.current.checkOccupationExcept(positionInfo.x - 1, positionInfo.z, positionInfo.width, positionInfo.height,this))
                 {
-                    nextX = x - 1;
-                    nextZ = z;
+                    nextX = positionInfo.x - 1;
+                    nextZ = positionInfo.z;
                 }
                 else
                 {
-                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x - 1, z), width, height);
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x - 1, positionInfo.z), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
                 }
@@ -529,53 +530,53 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         switch (dir)
         {
             case IUnit.dir.forward:
-                if (GridSystem.current.checkOccupationExcept(x, z + 1, width, height, this))
+                if (GridSystem.current.checkOccupationExcept(positionInfo.x, positionInfo.z + 1, positionInfo.width, positionInfo.height, this))
                 {
-                    nextX = x;
-                    nextZ = z + 1;
+                    nextX = positionInfo.x;
+                    nextZ = positionInfo.z + 1;
                 }
                 else
                 {
-                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x, z + 1), width, height);
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x, positionInfo.z + 1), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
                 }
                 break;
             case IUnit.dir.right:
-                if (GridSystem.current.checkOccupationExcept(x + 1, z, width, height, this))
+                if (GridSystem.current.checkOccupationExcept(positionInfo.x + 1, positionInfo.z, positionInfo.width, positionInfo.height, this))
                 {
-                    nextX = x + 1;
-                    nextZ = z;
+                    nextX = positionInfo.x + 1;
+                    nextZ = positionInfo.z;
                 }
                 else
                 {
-                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x + 1, z), width, height);
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x + 1, positionInfo.z), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
                 }
                 break;
             case IUnit.dir.backward:
-                if (GridSystem.current.checkOccupationExcept(x, z - 1, width, height, this))
+                if (GridSystem.current.checkOccupationExcept(positionInfo.x, positionInfo.z - 1, positionInfo.width, positionInfo.height, this))
                 {
-                    nextX = x;
-                    nextZ = z - 1;
+                    nextX = positionInfo.x;
+                    nextZ = positionInfo.z - 1;
                 }
                 else
                 {
-                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x, z - 1), width, height);
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x, positionInfo.z - 1), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
                 }
                 break;
             case IUnit.dir.left:
-                if (GridSystem.current.checkOccupationExcept(x - 1, z, width, height, this))
+                if (GridSystem.current.checkOccupationExcept(positionInfo.x - 1, positionInfo.z, positionInfo.width, positionInfo.height, this))
                 {
-                    nextX = x - 1;
-                    nextZ = z;
+                    nextX = positionInfo.x - 1;
+                    nextZ = positionInfo.z;
                 }
                 else
                 {
-                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(x - 1, z), width, height);
+                    var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x - 1, positionInfo.z), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
                 }
@@ -587,7 +588,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     // Update transform.position until it equals to NextPosition. It will keep remove Value and set value to update GridVal.
     private void MoveToNextPosition()
     {
-        GridSystem.current.removeValue(transform.position, width, height);
+        GridSystem.current.removeValue(transform.position, positionInfo.width, positionInfo.height);
 
         //Make sure the unit will finally arrive exactly at the next position.
         if ((nextPosition - transform.position).magnitude > Time.deltaTime * trueSpeed)
@@ -599,14 +600,14 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
             transform.position = nextPosition;
             //isMoving = false;
         }
-        GridSystem.current.setValue(transform.position, 10, this, width, height);
+        GridSystem.current.setValue(transform.position, 10, this, positionInfo.width, positionInfo.height);
     }
 
     // Animation Callback function.
     public float DealDamage( IUnit.DamageType type)
     {
         //Find the target unit
-        var target = ts.getTarget(x, z, faceDirection);
+        var target = ts.getTarget(positionInfo.x, positionInfo.z, faceDirection);
         float damage = -1;
         if(target != null)
         {
