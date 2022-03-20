@@ -7,12 +7,6 @@ public interface IBuilding : IPlaceableObj
     /// <summary>
     /// The units that can be produced by this building
     /// </summary>
-    List<GameObject> TrainableUnits
-    {
-        get;
-        set;
-    }
-
 
     public enum dir {forward,left,backward,right};
 

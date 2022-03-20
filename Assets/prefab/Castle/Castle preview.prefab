@@ -59,7 +59,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   previewPrefab: {fileID: 4394565833366194244}
-  skillUIData: {fileID: 11400000, guid: 57ca1866ea290c641b42283888efb7e7, type: 2}
+  skillManager:
+    uIData: {fileID: 11400000, guid: 57ca1866ea290c641b42283888efb7e7, type: 2}
+    trainableUnits:
+    - {fileID: 5109622048675680628, guid: 16dcb777c27051349b46d9a7c3ea0da7, type: 3}
+    testNum: 1
 --- !u!1 &8518149390742686517
 GameObject:
   m_ObjectHideFlags: 0

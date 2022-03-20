@@ -7,10 +7,10 @@ using UnityEngine.UI;
 
 public class SkillUIManager : MonoBehaviour
 {
-    const int MAX_SKILL_NUM = 8;
+   public const int MAX_SKILL_NUM = 8;
 
     Image[] SkIllSlotUI;
-    List<Image> addedSkillUI;
+    List<GameObject> addedObj;
 
 
     private void Start()
@@ -20,7 +20,7 @@ public class SkillUIManager : MonoBehaviour
         {
             Debug.LogError($"Invalid skill number{SkIllSlotUI.Length}");
         }
-        addedSkillUI = new List<Image>();
+        addedObj = new List<GameObject>();
     }
 
     public void refreshSkillUI(SkillUIData uiData)
@@ -54,18 +54,35 @@ public class SkillUIManager : MonoBehaviour
 
         var button = skillImageObj.AddComponent<Button>();
 
-        addedSkillUI.Add(addedImage);
+        addedObj.Add(skillImageObj);
     }
 
     public void removeSkillUI()
     {
-        foreach(var e in addedSkillUI)
+        foreach(var e in addedObj)
         {
             if(e != null)
             {
-                Destroy(e.gameObject);
+                Destroy(e);
             }
            
+        }
+    }
+
+    public void RegisterClickCallback(int index, UnityAction<int> callback, int arg)
+    {
+        if (callback == null) return;
+        if(index < MAX_SKILL_NUM && index>=0)
+        {
+            var selectedObj = SkIllSlotUI[index].gameObject;
+            if (selectedObj.transform.childCount != 0 && selectedObj.GetComponentInChildren<Button>())
+            {
+                selectedObj.GetComponentInChildren<Button>().onClick.AddListener(() => { callback(arg);});
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"failed to set skill button callback for index:{index}");
         }
     }
 }

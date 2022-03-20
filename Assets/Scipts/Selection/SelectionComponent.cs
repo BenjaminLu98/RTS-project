@@ -22,6 +22,7 @@ public class SelectionComponent  : MonoBehaviour
                 if (building != null)
                 {
                     skillUIManager.refreshSkillUI(building.SkillUIData);
+                    building.registerSkillUI(skillUIManager);
                 }
                 break;
             case "Unit":

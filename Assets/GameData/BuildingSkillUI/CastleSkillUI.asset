@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3129837945a96e54598a16b25d655bea, type: 3}
   m_Name: CastleSkillUI
   m_EditorClassIdentifier: 
-  skill1: {fileID: 0}
-  skill2: {fileID: 0}
-  skill3: {fileID: 0}
-  skill4: {fileID: 0}
-  skill5: {fileID: 21300000, guid: 5d7061fc7da05ce44add317708ec7215, type: 3}
-  skill6: {fileID: 0}
-  skill7: {fileID: 0}
-  skill8: {fileID: 0}
+  skills:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 21300000, guid: 5d7061fc7da05ce44add317708ec7215, type: 3}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}

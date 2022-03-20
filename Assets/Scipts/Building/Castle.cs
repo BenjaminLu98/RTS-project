@@ -4,16 +4,15 @@ using UnityEngine;
 
 public class Castle : Building
 {
-    public Castle()
+    private void Awake()
     {
-        width = 4;
-        height = 4;
+        base.Awake();
+        skillManager.PositionInfo.width = 4;
+        skillManager.PositionInfo.height = 4;
+    }
+    public override void registerSkillUI(SkillUIManager UIManager)
+    {
+        skillManager.RegisterUICallback(UIManager);
     }
 
-    protected void Start()
-    {
-        base.Start();
-        //Archer
-        trainableUnits.Add(rl.resourceList[0]);
-    }
 }

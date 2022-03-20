@@ -72,7 +72,7 @@ public class buildButton : MonoBehaviour
                 Vector3 position = GridUtils.ScreenToGridPlane();
                 int x, z;
                 GridSystem.current.getXZ(position, out x, out z);
-                Building building = prefab.GetComponent<Building>();
+                Building building = previewInstance.GetComponent<Building>();
 
                 //TODO: add width and height to the boundary check;
                 bool boundaryCheck = GridSystem.current.checkWorldPosition(position);

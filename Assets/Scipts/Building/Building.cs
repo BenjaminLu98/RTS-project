@@ -4,27 +4,30 @@ using UnityEngine;
 
 public abstract class Building : MonoBehaviour,IBuilding
 {
-    protected List<GameObject> trainableUnits;
-    [SerializeField] protected GameObject previewPrefab;
+    [SerializeField] 
+    protected GameObject previewPrefab;
     protected ResourceLoader rl;
-    [SerializeField] private SkillUIData skillUIData;
 
-    protected void Start()
+    [SerializeField]
+    protected BuildingSkillManager skillManager;
+    protected int hp;
+
+
+    protected void Awake()
     {
         gameObject.tag = "Building";
         gameObject.layer = 7;
-        trainableUnits = new List<GameObject>();
-        rl = FindObjectOfType<ResourceLoader>();
+        skillManager.PositionInfo = new PositionInfo();
     }
 
     public List<GameObject> TrainableUnits { 
         get
         {
-            return trainableUnits;
+            return skillManager.TrainableUnits;
         }
         set
         {
-            trainableUnits = value;
+            skillManager.TrainableUnits = value;
         }
     }
 
@@ -33,7 +36,7 @@ public abstract class Building : MonoBehaviour,IBuilding
 
     }
 
-    protected int hp;
+
     public int HP
     {
         get
@@ -69,30 +72,25 @@ public abstract class Building : MonoBehaviour,IBuilding
         }
     }
 
-    protected int width ;
-    protected int height ;
     public Vector2Int Size
     {
         get
         {
-            return new Vector2Int(width, height);
+            return new Vector2Int(skillManager.PositionInfo.width, skillManager.PositionInfo.height);
         }
         set
         {
-            width = value.x;
-            height = value.y;
+            skillManager.PositionInfo.width = value.x;
+            skillManager.PositionInfo.height = value.y;
         }
     }
 
-    //x of grid position
-    protected int x;
-    //z of grid position
-    protected int z;
+
     public Vector2Int Position
     {
         get
         {
-            return new Vector2Int(x, z);
+            return new Vector2Int(skillManager.PositionInfo.x, skillManager.PositionInfo.z);
         }
     }
 
@@ -105,7 +103,7 @@ public abstract class Building : MonoBehaviour,IBuilding
         }
     }
 
-    public SkillUIData SkillUIData { get => skillUIData; set => skillUIData = value; }
+    public SkillUIData SkillUIData { get =>skillManager.UIData;  }
 
     /// <summary>
     /// rotate around the y axis in counter clockwise direction
@@ -144,10 +142,10 @@ public abstract class Building : MonoBehaviour,IBuilding
             Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);
             transform.position = truePosition;
 
-            GridSystem.current.removeValue(this.x, this.z, width, height);
+            GridSystem.current.removeValue(skillManager.PositionInfo.x, skillManager.PositionInfo.z, skillManager.PositionInfo.width, skillManager.PositionInfo.height);
 
-            this.x = x;
-            this.z = z;
+            skillManager.PositionInfo.x = x;
+            skillManager.PositionInfo.z = z;
 
             return true;
         }
@@ -161,7 +159,7 @@ public abstract class Building : MonoBehaviour,IBuilding
     /// <returns>true if the grid system successfully place the building at the this position</returns>
     public virtual bool placeAt(Vector3 worldPosition)
     {
-        bool isSuccess = GridSystem.current.setValue(worldPosition, 100, this, width, height);
+        bool isSuccess = GridSystem.current.setValue(worldPosition, 100, this, skillManager.PositionInfo.width, skillManager.PositionInfo.height);
         if (isSuccess)
         {
             int x, z;
@@ -170,8 +168,8 @@ public abstract class Building : MonoBehaviour,IBuilding
             transform.position = truePosition;
 
             //GridSystem.current.removeValue(this.x, this.z, width, height);
-            this.x = x;
-            this.z = z;
+            skillManager.PositionInfo.x = x;
+            skillManager.PositionInfo.z = z;
 
             return true;
         }
@@ -184,16 +182,16 @@ public abstract class Building : MonoBehaviour,IBuilding
     /// <param name="index">the index of the unit in trainable unit list</param>
     public void produce(int index)
     {
-        if (index < 0 || index > trainableUnits.Count)
+        if (index < 0 || index > TrainableUnits.Count)
         {
             Debug.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name + " :index out of range");
         }
 
-        Vector2Int TargetGrid = GridSystem.current.getBlankGrid(new Vector2Int(x, z), width, height);
+        Vector2Int TargetGrid = GridSystem.current.getBlankGrid(new Vector2Int(skillManager.PositionInfo.x, skillManager.PositionInfo.z), skillManager.PositionInfo.width, skillManager.PositionInfo.height);
         Vector3 targetPosition = GridSystem.current.getWorldPosition(TargetGrid.x, TargetGrid.y);
         if (GridSystem.current.checkOccupation(TargetGrid.x, TargetGrid.y))
         {
-            GameObject unit = Instantiate(trainableUnits[index], targetPosition, Quaternion.identity);
+            GameObject unit = Instantiate(TrainableUnits[index], targetPosition, Quaternion.identity);
             Unit placeableComponent = unit.GetComponent<Unit>();
             //Can I update the grid date at another place?
             //GridSystem.current.setValue(TargetGrid.x, TargetGrid.y, 99, placeableComponent, placeableComponent.Size.x, placeableComponent.Size.y);
@@ -201,4 +199,7 @@ public abstract class Building : MonoBehaviour,IBuilding
 
         }
     }
+
+    abstract public void registerSkillUI(SkillUIManager UIManager);
+
 }
