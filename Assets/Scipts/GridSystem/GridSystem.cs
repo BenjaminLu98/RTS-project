@@ -456,7 +456,6 @@ public class GridSystem
 
     public bool checkOccupationExcept(int x, int z, int width, int height, IPlaceableObj obj)
     {
-
         if (!checkWidthHeight(x, z, width, height)) return false;
         for (int i = 0; i < width; i++)
         {

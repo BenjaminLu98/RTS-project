@@ -11,7 +11,6 @@ public class BuildingSkillManager : SkillManager
     PositionInfo positionInfo;
     [SerializeField]
     List<GameObject> trainableUnits;
-    public int testNum;
 
     public List<GameObject> TrainableUnits { get => trainableUnits; set => trainableUnits = value; }
     public PositionInfo PositionInfo { get => positionInfo; set => positionInfo = value; }

@@ -17,7 +17,6 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     public event Action<float, float> onDamaged;
 
     protected float rotateSpeed = 250f;
-    //protected bool isMoving = false;
     protected bool isRotating = false;
     protected PositionInfo positionInfo;
     protected int nextX;

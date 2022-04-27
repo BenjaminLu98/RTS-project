@@ -4,6 +4,8 @@ using UnityEngine;
 
 public abstract class TargetSelector
 {
+    // TODO: should not return unit, because building can also be selected.
+
     private int teamNo;
 
     public int TeamNo { get => teamNo; set => teamNo = value; }
