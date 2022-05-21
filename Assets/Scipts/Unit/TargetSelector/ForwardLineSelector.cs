@@ -18,12 +18,12 @@ public class ForwardLineSelector : TargetSelector
     {
         for(int i = 0; i < attackRange; i++)
         {
-            var attactVec = UnitUtil.getDirVector2D(dir) * (i + 1);
+            var attackVec = UnitUtil.getDirVector2D(dir) * (i + 1);
             foreach (var unit in Unit.unitList)
             {
                 if(unit.teamNo != TeamNo)
                 {
-                    var targetPos = attactVec + new Vector2Int(x, z);
+                    var targetPos = attackVec + new Vector2Int(x, z);
                     if (targetPos == unit.Position)
                     {
                         return unit;

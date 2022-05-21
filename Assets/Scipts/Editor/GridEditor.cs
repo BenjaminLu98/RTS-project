@@ -34,8 +34,8 @@ public class GridPreviewEditor : EditorWindow
             GUILayout.Label(Selection.activeGameObject.name);
             if(GUILayout.Button("generate grid priview"))
             {
-                GridSystem.current.clearArrayAndCubes();
-                GridSystem.current.Initialzation(Selection.activeGameObject.transform.position,width,height);
+                GridSystem.current.clearArray();
+                GridSystem.current.Initialize(Selection.activeGameObject.transform.position,width,height);
             }
 
             // Note that this button assume that we have selected the map corresponding to the loading GridSystem.

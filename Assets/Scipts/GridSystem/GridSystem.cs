@@ -41,7 +41,7 @@ public class GridSystem
     {
         get
         {
-            return !(gridSystem.gridDataArray == null);
+            return gridSystem.gridDataArray != null;
         }
     }
 
@@ -72,8 +72,11 @@ public class GridSystem
             gridDataArray[i / height, i % height] = wrapper.gridDataArray[i];
         }
     }
-
-    public void Initialzation()
+    
+    /// <summary>
+    /// Initialize the origin point to (0,0,0) and array to 0.
+    /// </summary>
+    public void Initialize()
     {
         origin = new Vector3(0, 0, 0);
         gridDataArray = new GridData[width, height];
@@ -86,7 +89,10 @@ public class GridSystem
         }
     }
 
-    public void clearArrayAndCubes()
+    /// <summary>
+    /// Destroy all the cubes in the array and set array to null.
+    /// </summary>
+    public void clearArray()
     {
         if (gridDataArray == null) return;
         for (int i = 0; i < width; i++)
@@ -99,7 +105,14 @@ public class GridSystem
         gridDataArray = null;
     }
 
-    public void Initialzation(Vector3 origin, int width, int height)
+    /// <summary>
+    /// Initialize all the grid data with specific origin, width and height. By default, height 
+    /// is 0 and Cube type is Grass.
+    /// </summary>
+    /// <param name="origin"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    public void Initialize(Vector3 origin, int width, int height)
     {
         GridSystem.current.origin = origin;
         GridSystem.current.width = width;
@@ -158,6 +171,7 @@ public class GridSystem
         return origin.y;
     }
 
+    //TODO: Remove this method because this method violates SRP.
     /// <summary>
     /// Draw grid data using TextmeshPro. Use it in the start method.
     /// </summary>
@@ -172,6 +186,7 @@ public class GridSystem
         
     }
 
+    //TODO: Remove this method because this method violates SRP.
     /// <summary>
     /// Update grid value each frame for debugging. Call it when the grid value need to be update.
     /// </summary>
@@ -186,7 +201,7 @@ public class GridSystem
         }
     }
     
-    // TODO: move to util
+    //TODO: Remove this method because this method violates SRP.
     //Draw the grid
     public void drawDebugLine()
     {
