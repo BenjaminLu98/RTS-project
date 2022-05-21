@@ -11,8 +11,6 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         unitList = new List<Unit>();
     }
 
-    public Unit obj;
-
     public event Action onDeath;
     public event Action<float, float> onDamaged;
 
@@ -34,7 +32,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     private IUnit.dir faceDirection;
     private float maxSpeed = 3f;
     private bool isDead = false;
-    public int teamNo;
+    protected int teamNo;
 
     [SerializeField]
     protected CombatData defaultCombatData;
@@ -686,4 +684,14 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         }
     }
 
+    /// <summary>
+    /// This method will change TeamNo to a different one. 0->1 1->0.
+    /// If teamNo is not 1 or 0, it will set it to 0.
+    /// </summary>
+    public void changeTeamNo()
+    {
+        if(TeamNo==0)TeamNo=1;
+        else if(TeamNo==1)TeamNo=0;
+        else TeamNo=0;
+    }
 }

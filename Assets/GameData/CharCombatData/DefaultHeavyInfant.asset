@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4172c16103bc8a04bb6ab73916217e7d, type: 3}
   m_Name: DefaultHeavyInfant
   m_EditorClassIdentifier: 
-  hp: 300
+  hp: 250
   physicalAttack: 40
   magicAttack: 0
-  physicalDefence: 20
+  physicalDefence: 15
   magicDefence: 20
   mana: 0
   attackInterval: 2
