@@ -11,6 +11,7 @@ public class GridPreviewEditor : EditorWindow
     private int width;
     private int height;
     private float sideLength;
+    private string dataPath;
 
     // The entrance of this editor
     [MenuItem("MapGenrator/GridPreviewEditor")]
@@ -44,7 +45,7 @@ public class GridPreviewEditor : EditorWindow
             {
                 var selectedPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(Selection.activeGameObject);
 
-                string jsonText = File.ReadAllText(Application.persistentDataPath + "/RTS_data/" + selectedPath.Substring(selectedPath.LastIndexOf("/") + 1) + ".json");
+                string jsonText = File.ReadAllText(Application.dataPath + "/RTS_data/Map.json");
 
                 GridSystem.current.fromJson(jsonText);
 
@@ -57,7 +58,7 @@ public class GridPreviewEditor : EditorWindow
                 string localPath = "Assets/Resources/Map/MapPrefabs/Map.prefab";
                 //localPath = AssetDatabase.GenerateUniqueAssetPath(localPath);
 
-                string jsonPath = Application.persistentDataPath + "/RTS_data/" + localPath.Substring(localPath.LastIndexOf("/")+1) + ".json";
+                string jsonPath = Application.dataPath + "/RTS_data/Map.json";
 
                 var mapObj = GameObject.Find("Map");
                 if (mapObj)

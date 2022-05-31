@@ -5,6 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
+/// <summary>
+/// Building Skill Manager implement the behavior of the skills as well as register
+/// those concrete skills to the button callback.
+/// </summary>
 [Serializable]
 public class BuildingSkillManager : SkillManager
 {

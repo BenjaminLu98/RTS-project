@@ -5,12 +5,15 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
+/// <summary>
+/// SkillUIManager control the skill UI and manage .
+/// </summary>
 public class SkillUIManager : MonoBehaviour
 {
    public const int MAX_SKILL_NUM = 8;
 
     Image[] SkIllSlotUI;
-    List<GameObject> addedObj;
+    List<GameObject> addedImgObj;
 
 
     private void Start()
@@ -20,7 +23,7 @@ public class SkillUIManager : MonoBehaviour
         {
             Debug.LogError($"Invalid skill number{SkIllSlotUI.Length}");
         }
-        addedObj = new List<GameObject>();
+        addedImgObj = new List<GameObject>();
     }
 
     public void refreshSkillUI(SkillUIData uiData)
@@ -54,12 +57,12 @@ public class SkillUIManager : MonoBehaviour
 
         var button = skillImageObj.AddComponent<Button>();
 
-        addedObj.Add(skillImageObj);
+        addedImgObj.Add(skillImageObj);
     }
 
     public void removeSkillUI()
     {
-        foreach(var e in addedObj)
+        foreach(var e in addedImgObj)
         {
             if(e != null)
             {
