@@ -24,7 +24,7 @@ public class BuildingSkillManager : SkillManager
         this.PositionInfo = positionInfo;
     }
 
-    public override void RegisterUICallback(SkillUIManager manager)
+    public override void RegisterUICallback(SkillUIManager UImanager)
     {
         int i = 0;
         for(int j = 0; j < uIData.skills.Length; j++)
@@ -33,7 +33,7 @@ public class BuildingSkillManager : SkillManager
             {
                 if (i < TrainableUnits.Count)
                 {
-                    manager.RegisterClickCallback(j, UseSkill, i);
+                    UImanager.RegisterClickCallback(j, UseSkill, i);
                     i++;
                 }
             }
