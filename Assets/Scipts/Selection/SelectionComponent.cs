@@ -57,7 +57,20 @@ public class SelectionComponent  : MonoBehaviour
                 if (Input.GetMouseButtonUp(1))
                 {
                     Vector3 targetPosition = GridUtils.ScreenToGridPlane();
-                    GetComponent<IMoveable>().moveTo(targetPosition, 3f);
+                    int x, z;
+                    GridSystem.current.getXZ(targetPosition, out x, out z);
+                    if (!GridSystem.current.checkOccupation(x, z)&&gameObject.GetComponent<Unit>())
+                    {
+                        gameObject.GetComponent<Unit>().ChasingObj = GridSystem.current.getGridData(x, z).PlaceableObj;
+                    }
+                    else
+                    {
+                        gameObject.GetComponent<Unit>().ChasingObj = null;
+                        GetComponent<IMoveable>().moveTo(targetPosition, 3f);
+                    }
+
+                    
+                    
                 }
                 break;
         }

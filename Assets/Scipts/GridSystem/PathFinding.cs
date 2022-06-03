@@ -20,8 +20,10 @@ public class PathFinding
     /// <param name="startZ"></param>
     /// <param name="endX"></param>
     /// <param name="endZ"></param>
+    /// <param name="considerEndOccupation">if true, the method will report error when the end node is occupied. 
+    /// If false, the last node's occupation will be ignored.</param>
     /// <returns></returns>
-    public List<GridData> FindPath(int startX, int startZ, int endX, int endZ)
+    public List<GridData> FindPath(int startX, int startZ, int endX, int endZ, bool considerEndOccupation)
     {
         GridData startNode = GridSystem.current.getGridData(startX, startZ);
         GridData endNode = GridSystem.current.getGridData(endX, endZ);
@@ -48,6 +50,11 @@ public class PathFinding
         while (openList.Count > 0)
         {
             GridData currentNode = getLowestFCostNode(openList);
+            if (!considerEndOccupation && Mathf.Abs(endZ - currentNode.Position.y) + Mathf.Abs(endX - currentNode.Position.x) <= 1)
+            {
+                endNode.comeFromNode = currentNode;
+                currentNode = endNode;
+            }
             if (currentNode == endNode)
             {
                 return CalculatePath(endNode);

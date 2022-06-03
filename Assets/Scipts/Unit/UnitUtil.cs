@@ -102,8 +102,13 @@ public class UnitUtil
 
     public static IUnit.dir GetDirWithPF(List<GridData> path)
     {
-        // If the unit already reached the targetPosition.
+        // If the unit already reached the target position, it will face forward.
         if (path.Count == 1) return IUnit.dir.forward;
+        // If the unit is only one step away from the target position, it will face to the target.
+        if (path.Count == 2)
+        {
+            return getDir(path[1].Position, path[0].Position);
+        }
 
         var diff = path[path.Count - 2].Position - path[path.Count - 1].Position;
         //Debug.Log($"path[path.Count - 2]{path[path.Count - 2].Position},path[path.Count-1]:{path[path.Count - 1].Position}");
