@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(SelectionComponent))]
 public abstract class Unit : MonoBehaviour, IUnit, IMoveable
 {
     public static List<Unit> unitList;
@@ -57,6 +58,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         InitializeStateManager();
         currentCombatStatus = Instantiate<CombatData>(defaultCombatData);
 
+        GetComponent<SelectionComponent>().enabled = false;
 
         this.gameObject.tag = "Unit";
         this.gameObject.layer = 7;

@@ -7,7 +7,6 @@ public class SelectionMap
     private Dictionary<int, GameObject> selectionMap=new Dictionary<int, GameObject>();
     string currentTag;
 
-    //TODO: select building
     /// <summary>
     /// Add the obj into the map and add a Selection component to this object.
     /// </summary>
@@ -26,7 +25,7 @@ public class SelectionMap
             if (!(selectionMap.ContainsKey(id)))
             {
                 selectionMap.Add(id, obj);
-                obj.AddComponent<SelectionComponent>();
+                obj.GetComponent<SelectionComponent>().enabled=true;
                 Debug.Log("Added " + id + " to selected dict");
             }
         }
@@ -36,7 +35,7 @@ public class SelectionMap
     {
         if (obj != null)
         {
-            GameObject.DestroyImmediate(obj.GetComponent <SelectionComponent>());
+            obj.GetComponent<SelectionComponent>().enabled=false;
             selectionMap.Remove(obj.GetInstanceID());
             Debug.Log("Removed " + obj.gameObject.GetInstanceID() + " to selected dict");
         }
@@ -49,7 +48,7 @@ public class SelectionMap
         {
             if (pair.Value != null)
             {
-                GameObject.DestroyImmediate(pair.Value.GetComponent<SelectionComponent>());
+                pair.Value.GetComponent<SelectionComponent>().enabled=false;
                 Debug.Log("Removed " + pair.Value.GetInstanceID() + " to selected dict");
             }
    

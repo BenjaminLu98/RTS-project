@@ -7,12 +7,19 @@ using UnityEngine.UI;
 public class SelectionComponent  : MonoBehaviour
 {
     SkillUIManager skillUIManager;
+    /// <summary>
+    /// This effect appears when the Unit or Building is selected.
+    /// </summary>
+    public GameObject selectionEffectObj;
     
 
     // Start is called before the first frame update
     void OnEnable()
     {
         skillUIManager = GameObject.FindObjectOfType<SkillUIManager>();
+
+        if(selectionEffectObj != null)selectionEffectObj.SetActive(true);
+
         if (skillUIManager == null) Debug.LogError("Skill manager not found!");
 
         switch (gameObject.tag)
@@ -31,6 +38,16 @@ public class SelectionComponent  : MonoBehaviour
 
     }
 
+    private void OnDisable()
+    {
+        if(selectionEffectObj != null)selectionEffectObj.SetActive(false);
+        if (skillUIManager != null)
+        {
+            skillUIManager.removeSkillUI();
+        }
+    }
+
+
     private void Update()
     {
         switch (gameObject.tag){
@@ -44,10 +61,5 @@ public class SelectionComponent  : MonoBehaviour
                 }
                 break;
         }
-    }
-
-    private void OnDestroy()
-    {
-        skillUIManager.removeSkillUI();
     }
 }

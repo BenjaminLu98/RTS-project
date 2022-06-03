@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(SelectionComponent))]
 public abstract class Building : MonoBehaviour,IBuilding
 {
     [SerializeField] 
@@ -18,6 +19,8 @@ public abstract class Building : MonoBehaviour,IBuilding
         gameObject.tag = "Building";
         gameObject.layer = 7;
         skillManager.PositionInfo = new PositionInfo();
+        
+        GetComponent<SelectionComponent>().enabled = false;
     }
 
     public List<GameObject> TrainableUnits { 
