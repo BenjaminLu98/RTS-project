@@ -179,6 +179,21 @@ public class GridUtils
         return list;
     }
 
+
+
+    public static bool isNeibour(int x1, int z1, Vector3 v2)
+    {
+        int x2, z2;
+        GridSystem.current.getXZ(v2, out x2, out z2);
+        if (Mathf.Abs(x2 - x1) + Mathf.Abs(z2 - z1) <= 1)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     public static float calculateDistance(int x1, int z1, int x2, int z2)
     {
        return Vector2Int.Distance(new Vector2Int(x1, z1), new Vector2Int(x2, z2))*GridSystem.current.sideLength;

@@ -18,17 +18,4 @@ public class CombatData : ScriptableObject
     public float moveSpeed;
     public float rotateSpeed;
 
-    public CombatData(CombatData data)
-    {
-        hp = data.hp;
-        physicalAttack = data.physicalAttack;   
-        magicAttack = data.magicAttack;
-        physicalDefence = data.physicalDefence;
-        magicDefence = data.magicDefence;
-        mana = data.mana;
-        attackInterval = data.attackInterval;
-        attackRange = data.attackRange;
-        moveSpeed = data.moveSpeed;
-        rotateSpeed = data.rotateSpeed;
-    }
 }

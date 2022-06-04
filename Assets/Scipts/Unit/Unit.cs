@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(SelectionComponent))]
+[RequireComponent(typeof(HealthBar))]
 public abstract class Unit : MonoBehaviour, IUnit, IMoveable
 {
     public static List<Unit> unitList;
@@ -57,7 +58,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         faceRotation = modelTransform.rotation;
         pf = new PathFinding();
         
-        currentCombatStatus = new CombatData(defaultCombatData);
+        currentCombatStatus = Instantiate<CombatData>(defaultCombatData);
 
         GetComponent<SelectionComponent>().enabled = false;
 
@@ -386,6 +387,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
             .OnExit(() => Debug.Log(gameObject.name+" exit idle"))
             .addCondition("Die",()=> isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
+            //TODO: debug here
             // Two conditons for units to run:
             // 1, target position is different from current position, and target is within the range.
             // 2, target position is different from current position, and unit is not chasing the object.

@@ -20,9 +20,9 @@ public class GridSystem
             
             if(gridSystem == null)
             {
-                if(File.Exists(Application.persistentDataPath + "/RTS_data/Map.prefab.json"))
+                if(File.Exists(Application.dataPath + "/RTS_data/Map.json"))
                 {
-                    string jsonText = File.ReadAllText(Application.persistentDataPath + "/RTS_data/Map.prefab.json");
+                    string jsonText = File.ReadAllText(Application.dataPath + "/RTS_data/Map.json");
                     gridSystem = new GridSystem();
                     GridSystem.gridSystem.fromJson(jsonText);
                     if (GridSystem.Initialized == false) Debug.LogError("GridSystem not initialized properly");
@@ -30,6 +30,7 @@ public class GridSystem
                 else
                 {
                     gridSystem = new GridSystem();
+                    Debug.LogWarning("Grid system not loaded");
                 }
                 
             }

@@ -192,6 +192,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: SelectionEffectObject
       objectReference: {fileID: 0}
+    - target: {fileID: 8422008673096269101, guid: d035e6563c6b4fc46b77ba6d431ef3a8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d035e6563c6b4fc46b77ba6d431ef3a8, type: 3}
 --- !u!4 &3472491328548502326 stripped
