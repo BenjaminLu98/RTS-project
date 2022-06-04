@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using GridSystem;
+using Grid;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;

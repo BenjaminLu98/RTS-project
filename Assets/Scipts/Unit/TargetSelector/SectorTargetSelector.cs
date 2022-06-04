@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using GridSystem;
+using Grid;
 using UnityEngine;
 
 public class SectorTargetSelector : TargetSelector

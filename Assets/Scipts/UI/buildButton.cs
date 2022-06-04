@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
-using GridSystem;
+using Grid;
 
 public class buildButton : MonoBehaviour 
 { 

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Grid;
 
 [RequireComponent(typeof(SelectionComponent))]
 public abstract class Building : MonoBehaviour,IBuilding

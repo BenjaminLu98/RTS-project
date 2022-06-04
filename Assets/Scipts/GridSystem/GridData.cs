@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace GridSystem
+namespace Grid
 {
     public enum CubeType
 {

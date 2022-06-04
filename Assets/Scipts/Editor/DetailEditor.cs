@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using Grid;
 
 [CustomEditor(typeof(ResourceLoader))]
 public class DetailEditor : Editor

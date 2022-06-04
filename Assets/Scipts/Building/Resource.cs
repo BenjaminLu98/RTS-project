@@ -1,10 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Grid;
 
 public abstract class Resource : MonoBehaviour,IPlaceableObj
 {
-    
+    private uint resourceAmount = 10000;
+
+
+    protected PositionInfo positionInfo;
+    protected bool isObstacle;
     public Vector2Int Position { 
         get
         {
@@ -35,8 +40,7 @@ public abstract class Resource : MonoBehaviour,IPlaceableObj
         }
     }
 
-    protected PositionInfo positionInfo;
-    protected bool isObstacle;
+    public uint ResourceAmount { get => resourceAmount; set => resourceAmount = value; }
 
     public bool placeAt(int x, int z)
     {
@@ -75,4 +79,19 @@ public abstract class Resource : MonoBehaviour,IPlaceableObj
         return false;
     }
 
+
+    public uint getResource(uint expectedNum)
+    {
+        if (resourceAmount >= expectedNum)
+        {
+            resourceAmount -= expectedNum;
+            return expectedNum;
+        }
+        else
+        {
+            resourceAmount = 0;
+            return 0;
+
+        }
+    }
 }

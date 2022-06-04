@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using GridSystem;
+using Grid;
 using UnityEngine;
 
 [RequireComponent(typeof(SelectionComponent))]

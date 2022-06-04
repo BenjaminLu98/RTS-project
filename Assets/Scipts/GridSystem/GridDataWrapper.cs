@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GridSystem
+namespace Grid
 {
     [System.Serializable]
     public class GridDataWrapper

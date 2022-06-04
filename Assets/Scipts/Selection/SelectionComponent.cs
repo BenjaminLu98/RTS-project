@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using GridSystem;
+using Grid;
 using UnityEngine;
 using UnityEngine.UI;
 
