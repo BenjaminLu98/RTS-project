@@ -56,10 +56,12 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         modelTransform = transform.GetChild(0);
         faceRotation = modelTransform.rotation;
         pf = new PathFinding();
-        InitializeStateManager();
+        
         currentCombatStatus = new CombatData(defaultCombatData);
 
         GetComponent<SelectionComponent>().enabled = false;
+
+        InitializeStateManager();
 
         this.gameObject.tag = "Unit";
         this.gameObject.layer = 7;
@@ -381,10 +383,10 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                     moveToChasingObj();
                 }            
             })
-            .OnExit(() => Debug.Log("exit idle"))
+            .OnExit(() => Debug.Log(gameObject.name+" exit idle"))
             .addCondition("Die",()=> isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
-            .addCondition("Run", () => !targetPosition.Equals(transform.position))
+            .addCondition("Run", () => !targetPosition.Equals(transform.position)&& ts.getTarget(positionInfo.x, positionInfo.z,faceDirection)==null)
             .addCondition("Attack", () => ts.getTarget(positionInfo.x, positionInfo.z,faceDirection) != null && countDown <= 0)
             );
 
@@ -398,14 +400,14 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                 Quaternion tempRotation = Quaternion.RotateTowards(modelTransform.rotation, faceRotation, currentCombatStatus.rotateSpeed * Time.deltaTime);
                 modelTransform.rotation = tempRotation;
             })
-            .OnExit(() => { Debug.Log("Rotate exit"); })
+            .OnExit(() => { Debug.Log(gameObject.name+" Rotate exit"); })
             );
         state.addStatus("Run", new State()
             .addCondition("Die", () => isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Idle", () => targetPosition.Equals(transform.position))
             .addCondition("Attack", () => ts.getTarget(positionInfo.x, positionInfo.z, faceDirection) != null && countDown <= 0)
-            .OnStart(() => { animator.SetBool("isRunning", true); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); ; Debug.Log("run onStart"); })
+            .OnStart(() => { animator.SetBool("isRunning", true); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); })
             .OnStay(() =>
             {
                 if (nextPosition.Equals(transform.position))
@@ -446,15 +448,15 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                     GridSystem.current.getXZ(transform.position, out positionInfo.x, out positionInfo.z);
                 }
             })
-            .OnExit(() => { Debug.Log("Run exit"); })
+            .OnExit(() => { Debug.Log(gameObject.name+" Run exit"); })
         );
 
         // TODO: Substitute it so that it is the attack animation duration.
-        float maxTime = 1.0f;
+        float maxTime = currentCombatStatus.attackInterval;
         float attackDuration = maxTime;
         state.addStatus("Attack", new State()
             // TODO: add animation stop
-            .addCondition("Idle", () => targetPosition.Equals(transform.position)&&attackDuration<0)
+            .addCondition("Idle", () => (targetPosition.Equals(transform.position)&&attackDuration<0)||ts.getTarget(positionInfo.x,positionInfo.z,faceDirection)!=null)
             .addCondition("Run", () => !targetPosition.Equals(transform.position) && attackDuration < 0)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation) && attackDuration < 0)
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", true); animator.SetBool("isRotating", false); })
@@ -468,6 +470,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                 animator.SetBool("isAttacking", false);
                 countDown = AttackInterval;
                 attackDuration = maxTime;
+                 Debug.Log(gameObject.name + " Attack exit"); 
             }
 
             ));
@@ -490,10 +493,13 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                 GridSystem.current.removeValue(positionInfo.x, positionInfo.z);
                 Destroy(this);
             })
-            .OnStay(()=>{
+            .OnStay(() => {
                 transform.position = transform.position - 0.5f * Time.deltaTime * Vector3.up;
-            }));
-        
+            })
+            .OnExit(() => { 
+                Debug.Log(gameObject.name + " Die exit"); 
+            }
+            ));
         state.Name = "Idle";
     }
 

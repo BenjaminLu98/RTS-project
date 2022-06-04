@@ -65,9 +65,11 @@ public class SelectionComponent  : MonoBehaviour
                     }
                     else
                     {
-                        gameObject.GetComponent<Unit>().ChasingObj = null;
-                        GetComponent<IMoveable>().moveTo(targetPosition);
-                    }
+                        if (gameObject.GetComponent<Unit>())
+                        {
+                            gameObject.GetComponent<Unit>().ChasingObj = null;
+                            GetComponent<IMoveable>().moveTo(targetPosition);
+                        }                    }
 
                     
                     

@@ -32,9 +32,13 @@ public class HealthBar : MonoBehaviour
     private void Unit_onDamaged(float defaultHP, float currentHP)
     {
         float percentage = Mathf.Clamp(currentHP/defaultHP, 0, 1);
-        healthBar.SetActive(true);
-        timeLeft = showTime;
-        GreenSlider.fillAmount = percentage;
+        if(healthBar != null)
+        {
+            healthBar.SetActive(true);
+            timeLeft = showTime;
+            GreenSlider.fillAmount = percentage;
+        }
+
     }
 
     private void Unit_OnDeath()
