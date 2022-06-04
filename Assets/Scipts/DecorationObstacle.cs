@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 
-    class DecorationObstacle : MonoBehaviour,IPlaceableObj
+class DecorationObstacle : MonoBehaviour,IPlaceableObj
     {
 
         //x of grid position

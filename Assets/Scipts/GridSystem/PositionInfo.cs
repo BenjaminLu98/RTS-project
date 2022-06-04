@@ -4,14 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
-
-public class PositionInfo
+namespace GridSystem
 {
-    //x of grid position
-    public int x;
-    //z of grid position
-    public int z;
-    public int width;
-    public int height;
+    public class PositionInfo
+    {
+        //x of grid position
+        public int x;
+        //z of grid position
+        public int z;
+        public int width;
+        public int height;
+    }
 }

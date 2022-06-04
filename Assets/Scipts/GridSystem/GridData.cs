@@ -2,7 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum CubeType
+
+namespace GridSystem
+{
+    public enum CubeType
 {
     Base,
     Grass
@@ -162,4 +165,5 @@ public class Cube
         }
     }
 
+}
 }
