@@ -20,3 +20,5 @@ MonoBehaviour:
   mana: 0
   attackInterval: 2
   attackRange: 5
+  moveSpeed: 5
+  rotateSpeed: 360

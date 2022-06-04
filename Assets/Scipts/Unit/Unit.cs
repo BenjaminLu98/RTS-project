@@ -386,7 +386,10 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
             .OnExit(() => Debug.Log(gameObject.name+" exit idle"))
             .addCondition("Die",()=> isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
-            .addCondition("Run", () => !targetPosition.Equals(transform.position)&& ts.getTarget(positionInfo.x, positionInfo.z,faceDirection)==null)
+            // Two conditons for units to run:
+            // 1, target position is different from current position, and target is within the range.
+            // 2, target position is different from current position, and unit is not chasing the object.
+            .addCondition("Run", () => !targetPosition.Equals(transform.position) && (ts.getTarget(positionInfo.x, positionInfo.z,faceDirection)==null||chasingObj==null))
             .addCondition("Attack", () => ts.getTarget(positionInfo.x, positionInfo.z,faceDirection) != null && countDown <= 0)
             );
 
@@ -456,8 +459,8 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         float attackDuration = maxTime;
         state.addStatus("Attack", new State()
             // TODO: add animation stop
-            .addCondition("Idle", () => (targetPosition.Equals(transform.position)&&attackDuration<0)||ts.getTarget(positionInfo.x,positionInfo.z,faceDirection)!=null)
-            .addCondition("Run", () => !targetPosition.Equals(transform.position) && attackDuration < 0)
+            .addCondition("Idle", () =>  attackDuration<0)
+            //.addCondition("Run", () => !targetPosition.Equals(transform.position) && attackDuration < 0)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation) && attackDuration < 0)
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", true); animator.SetBool("isRotating", false); })
             .OnStay(() =>
