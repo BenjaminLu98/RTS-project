@@ -15,14 +15,13 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     public event Action onDeath;
     public event Action<float, float> onDamaged;
 
-    protected float rotateSpeed = 250f;
+    
     protected bool isRotating = false;
     protected PositionInfo positionInfo;
     protected int nextX;
     protected int nextZ;
     protected Vector3 targetPosition;
     protected Vector3 nextPosition;
-    protected float trueSpeed = 2.0f;
     protected Quaternion faceRotation;
     protected Transform modelTransform;
     protected StateManager state;
@@ -58,7 +57,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         faceRotation = modelTransform.rotation;
         pf = new PathFinding();
         InitializeStateManager();
-        currentCombatStatus = Instantiate<CombatData>(defaultCombatData);
+        currentCombatStatus = new CombatData(defaultCombatData);
 
         GetComponent<SelectionComponent>().enabled = false;
 
@@ -129,7 +128,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     /// Change the TargetPosition.
     /// </summary>
     //TODO: minimum rotation.
-    public void moveTo(Vector3 WorldPosition, float speed)
+    public void moveTo(Vector3 WorldPosition)
     {
         int x, z;
         GridSystem.current.getXZ(WorldPosition, out x, out z);
@@ -145,10 +144,10 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         //faceRotation = getDirRotation(faceDirection);
     }
 
-    public void moveTo(int x, int z, float speed)
+    public void moveTo(int x, int z)
     {
         Vector3 targetPosition = GridSystem.current.getWorldPosition(x, z);
-        moveTo(targetPosition, speed);
+        moveTo(targetPosition);
     }
 
     
@@ -396,7 +395,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", true); Debug.Log("rotate onStart"); })
             .OnStay(() =>
             {
-                Quaternion tempRotation = Quaternion.RotateTowards(modelTransform.rotation, faceRotation, rotateSpeed * Time.deltaTime);
+                Quaternion tempRotation = Quaternion.RotateTowards(modelTransform.rotation, faceRotation, currentCombatStatus.rotateSpeed * Time.deltaTime);
                 modelTransform.rotation = tempRotation;
             })
             .OnExit(() => { Debug.Log("Rotate exit"); })
@@ -673,9 +672,9 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         GridSystem.current.removeValue(transform.position, positionInfo.width, positionInfo.height);
 
         //Make sure the unit will finally arrive exactly at the next position.
-        if ((nextPosition - transform.position).magnitude > Time.deltaTime * trueSpeed)
+        if ((nextPosition - transform.position).magnitude > Time.deltaTime * currentCombatStatus.moveSpeed)
         {
-            transform.position += Time.deltaTime * trueSpeed * UnitUtil.getDirVector(faceDirection);
+            transform.position += Time.deltaTime * currentCombatStatus.moveSpeed * UnitUtil.getDirVector(faceDirection);
         }
         else
         {
