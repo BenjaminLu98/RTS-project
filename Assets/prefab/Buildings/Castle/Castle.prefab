@@ -54,8 +54,8 @@ MonoBehaviour:
     uIData: {fileID: 11400000, guid: 57ca1866ea290c641b42283888efb7e7, type: 2}
     trainableUnits:
     - {fileID: 1776998060054731723, guid: 73ef98377fe433d4988f2eab016248d9, type: 3}
-    - {fileID: 5109622048675680628, guid: 16dcb777c27051349b46d9a7c3ea0da7, type: 3}
     - {fileID: 7756057299109670099, guid: 59da4be56daf58a4ab3a7c38616d678e, type: 3}
+    - {fileID: 5109622048675680628, guid: 16dcb777c27051349b46d9a7c3ea0da7, type: 3}
 --- !u!65 &6719984913608979978
 BoxCollider:
   m_ObjectHideFlags: 0
