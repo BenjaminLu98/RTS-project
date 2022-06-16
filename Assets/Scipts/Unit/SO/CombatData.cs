@@ -14,4 +14,8 @@ public class CombatData : ScriptableObject
     public float mana;
     public float attackInterval;
     public int attackRange;
+    //move in seconds.
+    public float moveSpeed;
+    public float rotateSpeed;
+
 }

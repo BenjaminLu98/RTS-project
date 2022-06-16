@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using Grid;
 
 public class GridPreviewEditor : EditorWindow
 {
@@ -11,6 +12,7 @@ public class GridPreviewEditor : EditorWindow
     private int width;
     private int height;
     private float sideLength;
+    private string dataPath;
 
     // The entrance of this editor
     [MenuItem("MapGenrator/GridPreviewEditor")]
@@ -34,8 +36,8 @@ public class GridPreviewEditor : EditorWindow
             GUILayout.Label(Selection.activeGameObject.name);
             if(GUILayout.Button("generate grid priview"))
             {
-                GridSystem.current.clearArrayAndCubes();
-                GridSystem.current.Initialzation(Selection.activeGameObject.transform.position,width,height);
+                GridSystem.current.clearArray();
+                GridSystem.current.Initialize(Selection.activeGameObject.transform.position,width,height);
             }
 
             // Note that this button assume that we have selected the map corresponding to the loading GridSystem.
@@ -44,7 +46,7 @@ public class GridPreviewEditor : EditorWindow
             {
                 var selectedPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(Selection.activeGameObject);
 
-                string jsonText = File.ReadAllText(Application.persistentDataPath + "/RTS_data/" + selectedPath.Substring(selectedPath.LastIndexOf("/") + 1) + ".json");
+                string jsonText = File.ReadAllText(Application.dataPath + "/RTS_data/Map.json");
 
                 GridSystem.current.fromJson(jsonText);
 
@@ -57,7 +59,7 @@ public class GridPreviewEditor : EditorWindow
                 string localPath = "Assets/Resources/Map/MapPrefabs/Map.prefab";
                 //localPath = AssetDatabase.GenerateUniqueAssetPath(localPath);
 
-                string jsonPath = Application.persistentDataPath + "/RTS_data/" + localPath.Substring(localPath.LastIndexOf("/")+1) + ".json";
+                string jsonPath = Application.dataPath + "/RTS_data/Map.json";
 
                 var mapObj = GameObject.Find("Map");
                 if (mapObj)

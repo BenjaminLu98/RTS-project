@@ -12,10 +12,9 @@ interface IMoveable
     /// Rotate to the target and move to the target position with animation. 
     /// </summary>
     /// <param name="worldPosition">target position</param>
-    /// <param name="speed"></param>
-    public void moveTo(Vector3 worldPosition, float speed);
+    public void moveTo(Vector3 worldPosition);
     //Move to the target position with animation
-    public void moveTo(int x, int z, float speed);
+    public void moveTo(int x, int z);
 
 }
 

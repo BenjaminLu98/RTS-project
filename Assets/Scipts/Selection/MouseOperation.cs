@@ -220,6 +220,7 @@ public class MouseOperation : MonoBehaviour
 
         return selectionMesh;
     }
+
     private void OnTriggerEnter(Collider other)
     {
         map.add(other.gameObject);
@@ -253,5 +254,10 @@ public class MouseOperation : MonoBehaviour
         List<RaycastResult> raysastResults = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, raysastResults);
         return raysastResults;
+    }
+
+    public List<GameObject> getSelctedObjects()
+    {
+        return map.getSelectedObjects();
     }
 }

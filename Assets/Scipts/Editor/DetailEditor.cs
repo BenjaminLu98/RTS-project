@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using Grid;
 
 [CustomEditor(typeof(ResourceLoader))]
 public class DetailEditor : Editor
@@ -18,6 +19,7 @@ public class DetailEditor : Editor
 
     public override void OnInspectorGUI()
     {
+
         serializedObject.Update();
         EditorGUILayout.PropertyField(rl);
         serializedObject.ApplyModifiedProperties();
@@ -28,7 +30,6 @@ public class DetailEditor : Editor
 
     private void OnSceneGUI()
     {
-        
         // Press R to change drawing state. 1~5 to change the object to be painted.
         if (Event.current.type == EventType.KeyDown)
         {

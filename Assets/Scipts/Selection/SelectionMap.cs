@@ -4,17 +4,16 @@ using UnityEngine;
 
 public class SelectionMap
 {
-    public Dictionary<int, GameObject> selectionMap=new Dictionary<int, GameObject>();
+    private Dictionary<int, GameObject> selectionMap=new Dictionary<int, GameObject>();
     string currentTag;
 
-    //TODO: select building
     /// <summary>
     /// Add the obj into the map and add a Selection component to this object.
     /// </summary>
     /// <param name="obj"></param>
     public void add(GameObject obj)
     {
-        if (obj.tag != currentTag&&selectionMap.Count!=0)
+        if (obj.tag != currentTag && selectionMap.Count!=0)
         {
             removeAll();
         }
@@ -26,7 +25,7 @@ public class SelectionMap
             if (!(selectionMap.ContainsKey(id)))
             {
                 selectionMap.Add(id, obj);
-                obj.AddComponent<SelectionComponent>();
+                obj.GetComponent<SelectionComponent>().enabled=true;
                 Debug.Log("Added " + id + " to selected dict");
             }
         }
@@ -36,7 +35,7 @@ public class SelectionMap
     {
         if (obj != null)
         {
-            GameObject.DestroyImmediate(obj.GetComponent <SelectionComponent>());
+            obj.GetComponent<SelectionComponent>().enabled=false;
             selectionMap.Remove(obj.GetInstanceID());
             Debug.Log("Removed " + obj.gameObject.GetInstanceID() + " to selected dict");
         }
@@ -49,11 +48,21 @@ public class SelectionMap
         {
             if (pair.Value != null)
             {
-                GameObject.DestroyImmediate(pair.Value.GetComponent<SelectionComponent>());
+                pair.Value.GetComponent<SelectionComponent>().enabled=false;
                 Debug.Log("Removed " + pair.Value.GetInstanceID() + " to selected dict");
             }
    
         }
         selectionMap.Clear();
+    }
+
+    public List<GameObject> getSelectedObjects()
+    {
+        List<GameObject> selectedObjects = new List<GameObject>();
+        foreach (KeyValuePair<int,GameObject> obj in selectionMap)
+        {
+            selectedObjects.Add(obj.Value);
+        }
+        return selectedObjects;
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Grid;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -109,7 +110,7 @@ public class GridSystemTest
     public void PathfindTest()
     {
         PathFinding pf = new PathFinding();
-        var path = pf.FindPath(7, 4, 6, 6);
+        var path = pf.FindPath(7, 4, 6, 6,true);
         foreach(var node in path)
         {
             Debug.Log(node.Position);
@@ -121,9 +122,9 @@ public class GridSystemTest
     public void PathfindTestWithOccupation()
     {
         PathFinding pf = new PathFinding();
-        var path1 = pf.FindPath(1, 1, 1, 4);
+        var path1 = pf.FindPath(1, 1, 1, 4,true);
         GridSystem.current.setValue(1, 2, 0 , null);
-        var path2 = pf.FindPath(1, 1, 1, 4);
+        var path2 = pf.FindPath(1, 1, 1, 4,true);
         Assert.AreNotEqual(path1, path2);
         foreach (var node in path2)
         {

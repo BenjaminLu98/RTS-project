@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Grid;
 
+[RequireComponent(typeof(SelectionComponent))]
 public abstract class Building : MonoBehaviour,IBuilding
 {
     [SerializeField] 
@@ -18,6 +20,8 @@ public abstract class Building : MonoBehaviour,IBuilding
         gameObject.tag = "Building";
         gameObject.layer = 7;
         skillManager.PositionInfo = new PositionInfo();
+        
+        GetComponent<SelectionComponent>().enabled = false;
     }
 
     public List<GameObject> TrainableUnits { 
@@ -136,7 +140,7 @@ public abstract class Building : MonoBehaviour,IBuilding
     /// <returns>true if the grid system successfully place the building at the this position</returns>
     public virtual bool placeAt(int x, int z)
     {
-        bool isSucess = GridSystem.current.setValue(x, z, 100, this);
+        bool isSucess = GridSystem.current.setValue(x, z, 100, this,skillManager.PositionInfo.width, skillManager.PositionInfo.height);
         if (isSucess)
         {
             Vector3 truePosition = GridSystem.current.getWorldPosition(x, z);

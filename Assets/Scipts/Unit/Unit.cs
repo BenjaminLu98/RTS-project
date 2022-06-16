@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Grid;
 using UnityEngine;
 
+[RequireComponent(typeof(SelectionComponent))]
+[RequireComponent(typeof(HealthBar))]
 public abstract class Unit : MonoBehaviour, IUnit, IMoveable
 {
     public static List<Unit> unitList;
@@ -11,19 +14,16 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         unitList = new List<Unit>();
     }
 
-    public Unit obj;
-
     public event Action onDeath;
     public event Action<float, float> onDamaged;
 
-    protected float rotateSpeed = 250f;
+    
     protected bool isRotating = false;
     protected PositionInfo positionInfo;
     protected int nextX;
     protected int nextZ;
     protected Vector3 targetPosition;
     protected Vector3 nextPosition;
-    protected float trueSpeed = 2.0f;
     protected Quaternion faceRotation;
     protected Transform modelTransform;
     protected StateManager state;
@@ -34,7 +34,9 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     private IUnit.dir faceDirection;
     private float maxSpeed = 3f;
     private bool isDead = false;
-    public int teamNo;
+    private IPlaceableObj chasingObj;
+
+    protected int teamNo;
 
     [SerializeField]
     protected CombatData defaultCombatData;
@@ -56,9 +58,12 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         modelTransform = transform.GetChild(0);
         faceRotation = modelTransform.rotation;
         pf = new PathFinding();
-        InitializeStateManager();
+        
         currentCombatStatus = Instantiate<CombatData>(defaultCombatData);
 
+        GetComponent<SelectionComponent>().enabled = false;
+
+        InitializeStateManager();
 
         this.gameObject.tag = "Unit";
         this.gameObject.layer = 7;
@@ -105,9 +110,14 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
     /// <summary>
     /// Check if targetPosition is occupied by other placeable object. 
     /// If yes, it find another blank grid and update the targetPosition and targetRotation.
+    /// Note that it will not change the target position if it is chasing another object.
     /// </summary>
     void CheckTargetOccupationAndUpdate()
     {
+        if(chasingObj != null)
+        {
+            return;
+        }
         int x, z;
         GridSystem.current.getXZ(targetPosition, out x, out z);
 
@@ -118,8 +128,11 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         }
     }
 
+    /// <summary>
+    /// Change the TargetPosition.
+    /// </summary>
     //TODO: minimum rotation.
-    public void moveTo(Vector3 WorldPosition, float speed)
+    public void moveTo(Vector3 WorldPosition)
     {
         int x, z;
         GridSystem.current.getXZ(WorldPosition, out x, out z);
@@ -135,10 +148,10 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         //faceRotation = getDirRotation(faceDirection);
     }
 
-    public void moveTo(int x, int z, float speed)
+    public void moveTo(int x, int z)
     {
         Vector3 targetPosition = GridSystem.current.getWorldPosition(x, z);
-        moveTo(targetPosition, speed);
+        moveTo(targetPosition);
     }
 
     
@@ -320,6 +333,8 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         }
     }
 
+    public IPlaceableObj ChasingObj { get => chasingObj; set => chasingObj = value; }
+
     public bool placeAt(int x, int z)
     {
         bool isSuccess = GridSystem.current.setValue(x, z, 100, this, positionInfo.width, positionInfo.height);
@@ -363,11 +378,21 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         state = new StateManager();
         state.addStatus("Idle", new State()
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); Debug.Log("Idle onStart"); })
-            .OnStay(() => { })
-            .OnExit(() => Debug.Log("exit idle"))
+            .OnStay(() => {
+                // Unless the unit have a target to attack, it will follow the chasingObj.
+                if(ts.getTarget(positionInfo.x, positionInfo.z, faceDirection) == null && chasingObj != null)
+                {
+                    moveToChasingObj();
+                }            
+            })
+            .OnExit(() => Debug.Log(gameObject.name+" exit idle"))
             .addCondition("Die",()=> isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
-            .addCondition("Run", () => !targetPosition.Equals(transform.position))
+            //TODO: debug here
+            // Two conditons for units to run:
+            // 1, target position is different from current position, and target is within the range.
+            // 2, target position is different from current position, and unit is not chasing the object.
+            .addCondition("Run", () => !targetPosition.Equals(transform.position) && (ts.getTarget(positionInfo.x, positionInfo.z,faceDirection)==null||chasingObj==null))
             .addCondition("Attack", () => ts.getTarget(positionInfo.x, positionInfo.z,faceDirection) != null && countDown <= 0)
             );
 
@@ -378,27 +403,43 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", true); Debug.Log("rotate onStart"); })
             .OnStay(() =>
             {
-                Quaternion tempRotation = Quaternion.RotateTowards(modelTransform.rotation, faceRotation, rotateSpeed * Time.deltaTime);
+                Quaternion tempRotation = Quaternion.RotateTowards(modelTransform.rotation, faceRotation, currentCombatStatus.rotateSpeed * Time.deltaTime);
                 modelTransform.rotation = tempRotation;
             })
-            .OnExit(() => { Debug.Log("Rotate exit"); })
+            .OnExit(() => { Debug.Log(gameObject.name+" Rotate exit"); })
             );
         state.addStatus("Run", new State()
             .addCondition("Die", () => isDead)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation))
             .addCondition("Idle", () => targetPosition.Equals(transform.position))
             .addCondition("Attack", () => ts.getTarget(positionInfo.x, positionInfo.z, faceDirection) != null && countDown <= 0)
-            .OnStart(() => {  animator.SetBool("isRunning", true); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); ; Debug.Log("run onStart"); })
+            .OnStart(() => { animator.SetBool("isRunning", true); animator.SetBool("isAttacking", false); animator.SetBool("isRotating", false); })
             .OnStay(() =>
             {
                 if (nextPosition.Equals(transform.position))
                 {
+                    // Unless the unit have a target to attack, it will follow the chasingObj.
+                    if (ts.getTarget(positionInfo.x, positionInfo.z, faceDirection) == null && chasingObj != null)
+                    {
+                        moveToChasingObj();
+                    }
+
                     CheckTargetOccupationAndUpdate();
 
                     // TODO: update this logic so that find path can be called less frequently.
                     int targetX, targetY;
                     GridSystem.current.getXZ(targetPosition, out targetX, out targetY);
-                    var path = pf.FindPath(positionInfo.x, positionInfo.z, targetX, targetY);
+                    List<GridData> path;
+
+                    if(chasingObj != null)
+                    {
+                        path = pf.FindPath(positionInfo.x, positionInfo.z, targetX, targetY,false);
+                    }
+                    else
+                    {
+                         path = pf.FindPath(positionInfo.x, positionInfo.z, targetX, targetY,true);
+                    }
+                    
 
                     // Update moveDirection and targetRotation
                     faceDirection = UnitUtil.GetDirWithPF(path);
@@ -413,16 +454,16 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                     GridSystem.current.getXZ(transform.position, out positionInfo.x, out positionInfo.z);
                 }
             })
-            .OnExit(() => { Debug.Log("Run exit"); })
+            .OnExit(() => { Debug.Log(gameObject.name+" Run exit"); })
         );
 
         // TODO: Substitute it so that it is the attack animation duration.
-        float maxTime = 1.0f;
+        float maxTime = currentCombatStatus.attackInterval;
         float attackDuration = maxTime;
         state.addStatus("Attack", new State()
             // TODO: add animation stop
-            .addCondition("Idle", () => targetPosition.Equals(transform.position)&&attackDuration<0)
-            .addCondition("Run", () => !targetPosition.Equals(transform.position) && attackDuration < 0)
+            .addCondition("Idle", () =>  attackDuration<0)
+            //.addCondition("Run", () => !targetPosition.Equals(transform.position) && attackDuration < 0)
             .addCondition("Rotate", () => !faceRotation.Equals(modelTransform.rotation) && attackDuration < 0)
             .OnStart(() => { animator.SetBool("isRunning", false); animator.SetBool("isAttacking", true); animator.SetBool("isRotating", false); })
             .OnStay(() =>
@@ -435,6 +476,7 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                 animator.SetBool("isAttacking", false);
                 countDown = AttackInterval;
                 attackDuration = maxTime;
+                 Debug.Log(gameObject.name + " Attack exit"); 
             }
 
             ));
@@ -457,11 +499,19 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                 GridSystem.current.removeValue(positionInfo.x, positionInfo.z);
                 Destroy(this);
             })
-            .OnStay(()=>{
+            .OnStay(() => {
                 transform.position = transform.position - 0.5f * Time.deltaTime * Vector3.up;
-            }));
-        
+            })
+            .OnExit(() => { 
+                Debug.Log(gameObject.name + " Die exit"); 
+            }
+            ));
         state.Name = "Idle";
+    }
+
+    private void moveToChasingObj()
+    {
+        targetPosition = GridSystem.current.getWorldPosition(chasingObj.Position.x, chasingObj.Position.y);
     }
 
     private void updateNextPositon()
@@ -536,6 +586,17 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                 }
                 else
                 {
+                    // If the unit is chasing for another object and is just one step away from the target position,
+                    // the unit will not look for a blank neibour grid to stay at.
+                    if (chasingObj != null)
+                    {
+                        int targetX, targetZ;
+                        GridSystem.current.getXZ(targetPosition, out targetX, out targetZ);
+                        if (Mathf.Abs(targetX - positionInfo.x) + Mathf.Abs(targetZ - positionInfo.z) <= 1)
+                        {
+                            return;
+                        }
+                    }
                     var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x, positionInfo.z + 1), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
@@ -549,6 +610,17 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                 }
                 else
                 {
+                    // If the unit is chasing for another object and is just one step away from the target position,
+                    // the unit will not look for a blank neibour grid to stay at.
+                    if (chasingObj != null)
+                    {
+                        int targetX, targetZ;
+                        GridSystem.current.getXZ(targetPosition, out targetX, out targetZ);
+                        if (Mathf.Abs(targetX - positionInfo.x) + Mathf.Abs(targetZ - positionInfo.z) <= 1)
+                        {
+                            return;
+                        }
+                    }
                     var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x + 1, positionInfo.z), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
@@ -562,6 +634,17 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                 }
                 else
                 {
+                    // If the unit is chasing for another object and is just one step away from the target position,
+                    // the unit will not look for a blank neibour grid to stay at.
+                    if (chasingObj != null)
+                    {
+                        int targetX, targetZ;
+                        GridSystem.current.getXZ(targetPosition, out targetX, out targetZ);
+                        if (Mathf.Abs(targetX - positionInfo.x) + Mathf.Abs(targetZ - positionInfo.z) <= 1)
+                        {
+                            return;
+                        }
+                    }
                     var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x, positionInfo.z - 1), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
@@ -575,6 +658,17 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
                 }
                 else
                 {
+                    // If the unit is chasing for another object and is just one step away from the target position,
+                    // the unit will not look for a blank neibour grid to stay at.
+                    if (chasingObj != null)
+                    {
+                        int targetX, targetZ;
+                        GridSystem.current.getXZ(targetPosition, out targetX, out targetZ);
+                        if (Mathf.Abs(targetX - positionInfo.x) + Mathf.Abs(targetZ - positionInfo.z) <= 1)
+                        {
+                            return;
+                        }
+                    }
                     var newXZ = GridSystem.gridSystem.getBlankGrid(new Vector2Int(positionInfo.x - 1, positionInfo.z), positionInfo.width, positionInfo.height);
                     nextX = newXZ.x;
                     nextZ = newXZ.y;
@@ -590,9 +684,9 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         GridSystem.current.removeValue(transform.position, positionInfo.width, positionInfo.height);
 
         //Make sure the unit will finally arrive exactly at the next position.
-        if ((nextPosition - transform.position).magnitude > Time.deltaTime * trueSpeed)
+        if ((nextPosition - transform.position).magnitude > Time.deltaTime * currentCombatStatus.moveSpeed)
         {
-            transform.position += Time.deltaTime * trueSpeed * UnitUtil.getDirVector(faceDirection);
+            transform.position += Time.deltaTime * currentCombatStatus.moveSpeed * UnitUtil.getDirVector(faceDirection);
         }
         else
         {
@@ -686,4 +780,14 @@ public abstract class Unit : MonoBehaviour, IUnit, IMoveable
         }
     }
 
+    /// <summary>
+    /// This method will change TeamNo to a different one. 0->1 1->0.
+    /// If teamNo is not 1 or 0, it will set it to 0.
+    /// </summary>
+    public void changeTeamNo()
+    {
+        if(TeamNo==0)TeamNo=1;
+        else if(TeamNo==1)TeamNo=0;
+        else TeamNo=0;
+    }
 }

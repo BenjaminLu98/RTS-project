@@ -1,3 +1,4 @@
 Base path: 'D:/GameEngine/2021.2.16f1/Editor/Data', plugins path 'D:/GameEngine/2021.2.16f1/Editor/Data/PlaybackEngines'
 Cmd: initializeCompiler
 
+Cmd: shutdown

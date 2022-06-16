@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Grid;
 using UnityEngine;
 
 
-    class DecorationObstacle : MonoBehaviour,IPlaceableObj
+class DecorationObstacle : MonoBehaviour,IPlaceableObj
     {
 
         //x of grid position
